@@ -1,0 +1,42 @@
+Benchmarking sedov, weak scaling
+#Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
+1         0.53         0.52         0.52         0.53         0.56         0.532
+2         0.59         0.56         0.57         0.57         0.58         0.574
+3         0.71         0.67         0.67         0.68         0.70         0.686
+4         0.75         0.70         0.71         0.71         0.72         0.718
+
+Benchmarking sedov, strong scaling
+#Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
+1         0.54         0.53         0.53         0.53         0.56         0.538
+2         0.33         0.31         0.31         0.32         0.33         0.320
+3         0.29         0.27         0.27         0.27         0.29         0.278
+4         0.24         0.22         0.22         0.23         0.23         0.228
+
+Benchmarking crtest, weak scaling
+#Threads  MG_prepare  MG_cycle  Total_MG
+1         0.041       0.202     2.103
+2         0.043       0.203     2.122
+3         0.053       0.234     2.447
+4         0.073       0.236     2.492
+
+Benchmarking crtest, strong scaling
+#Threads  MG_prepare  MG_cycle  Total_MG
+1         0.041       0.202     2.099
+2         0.022       0.103     1.072
+3         0.019       0.082     0.8559
+4         0.015       0.060     0.6335
+
+Benchmarking maclaurin, weak scaling
+#Threads  MG_prepare  MG_i-cycle  MG_multipole  MG_o-cycle  Total_MG
+1         0.011       0.029       1.327         0.027       1.594
+2         0.016       0.040       1.132         0.037       1.494
+3         0.022       0.055       1.311         0.051       1.816
+4         0.030       0.073       1.350         0.068       2.020
+
+Benchmarking maclaurin, strong scaling
+#Threads  MG_prepare  MG_i-cycle  MG_multipole  MG_o-cycle  Total_MG
+1         0.095       0.269       5.364         0.254       8.075
+2         0.066       0.177       2.721         0.166       4.506
+3         0.064       0.166       2.155         0.154       3.822
+4         0.059       0.157       1.631         0.146       3.210
+
