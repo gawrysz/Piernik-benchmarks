@@ -1,0 +1,43 @@
+Preparing objects                real/user/sys/CPU%:    9.8    5.5    5.8  116.49%
+Single-thread make object        real/user/sys/CPU%:   86.6   82.4    3.4   99.11%
+Multi-thread make object         real/user/sys/CPU%:   48.5   84.1    3.7  181.10%
+Multi-thread make two objects    real/user/sys/CPU%:   62.6  151.4    6.4  251.96%
+Multi-thread make four objects   real/user/sys/CPU%:  111.1  315.9   13.2  296.07%
+Multi-thread make eight objects  real/user/sys/CPU%:  213.2  599.3   24.6  292.66%
+
+Benchmarking sedov, weak scaling
+#Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
+1         0.70         0.67         0.67         0.68         0.70         0.684
+2         0.77         0.72         0.73         0.73         0.74         0.738
+3         0.84         0.78         0.78         0.78         0.79         0.794
+
+Benchmarking sedov, strong scaling
+#Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
+1         0.69         0.66         0.66         0.67         0.69         0.674
+2         0.42         0.39         0.40         0.40         0.41         0.404
+3         0.34         0.32         0.31         0.32         0.33         0.324
+
+Benchmarking crtest, weak scaling
+#Threads  MG_prepare  MG_cycle  Total_MG
+1         0.047       0.213     2.220
+2         0.051       0.221     2.313
+3         0.056       0.225     2.367
+
+Benchmarking crtest, strong scaling
+#Threads  MG_prepare  MG_cycle  Total_MG
+1         0.048       0.213     2.228
+2         0.028       0.112     1.175
+3         0.024       0.079     0.8318
+
+Benchmarking maclaurin, weak scaling
+#Threads  MG_prepare  MG_i-cycle  MG_multipole  MG_o-cycle  Total_MG
+1         0.015       0.040       1.230         0.037       1.593
+2         0.021       0.052       1.042         0.047       1.511
+3         0.028       0.066       1.048         0.061       1.653
+
+Benchmarking maclaurin, strong scaling
+#Threads  MG_prepare  MG_i-cycle  MG_multipole  MG_o-cycle  Total_MG
+1         0.124       0.320       4.911         0.297       8.116
+2         0.082       0.207       2.595         0.192       4.674
+3         0.077       0.185       1.948         0.169       3.793
+
