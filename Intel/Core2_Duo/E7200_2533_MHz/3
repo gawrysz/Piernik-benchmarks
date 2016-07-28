@@ -1,0 +1,37 @@
+Preparing objects                real/user/sys/CPU%:   12.3    8.3    5.5  112.51%
+Single-thread make object        real/user/sys/CPU%:   82.2   78.0    5.6  101.84%
+Multi-thread make object         real/user/sys/CPU%:   59.3   86.8    6.6  157.52%
+Multi-thread make two objects    real/user/sys/CPU%:   89.8  162.3   12.2  194.38%
+Multi-thread make four objects   real/user/sys/CPU%:  185.5  342.4   26.1  198.65%
+Multi-thread make eight objects  real/user/sys/CPU%:  358.2  661.0   51.2  198.79%
+
+Benchmarking sedov, weak scaling
+#Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
+1         0.88         0.86         0.87         0.87         0.91         0.878
+2         1.10         1.04         1.04         1.04         1.06         1.056
+
+Benchmarking sedov, strong scaling
+#Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
+1         0.89         0.86         0.87         0.87         0.91         0.880
+2         0.60         0.56         0.57         0.57         0.59         0.578
+
+Benchmarking crtest, weak scaling
+#Threads  MG_prepare  MG_cycle  Total_MG
+1         0.061       0.295     3.074
+2         0.072       0.307     3.216
+
+Benchmarking crtest, strong scaling
+#Threads  MG_prepare  MG_cycle  Total_MG
+1         0.061       0.302     3.143
+2         0.036       0.154     1.610
+
+Benchmarking maclaurin, weak scaling
+#Threads  MG_prepare  MG_i-cycle  MG_multipole  MG_o-cycle  Total_MG
+1         0.022       0.061       1.856         0.057       2.410
+2         0.038       0.095       1.616         0.088       2.482
+
+Benchmarking maclaurin, strong scaling
+#Threads  MG_prepare  MG_i-cycle  MG_multipole  MG_o-cycle  Total_MG
+1         0.179       0.533       7.386         0.500       12.73
+2         0.150       0.396       4.067         0.369       8.050
+
