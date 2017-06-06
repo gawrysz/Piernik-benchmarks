@@ -24,36 +24,41 @@ def read_timings(file):
             columns = line.split()
             if re.match("# test domains are scaled by factor of", line):
                 data["big"] = int(columns[-1])
-            if re.match("Preparing objects", line):
+            elif re.match("Preparing objects", line):
                 make_real[make_prep], make_load[make_prep] = extr_make_t(columns)
-            if re.match("Single-thread make object", line):
+            elif re.match("Single-thread make object", line):
                 make_real[make_11], make_load[make_11] = extr_make_t(columns)
-            if re.match("Multi-thread make object", line):
+            elif re.match("Multi-thread make object", line):
                 make_real[make_1n], make_load[make_1n] = extr_make_t(columns)
-            if re.match("Multi-thread make two objects", line):
+            elif re.match("Multi-thread make two objects", line):
                 make_real[make_2n], make_load[make_2n] = extr_make_t(columns)
-            if re.match("Multi-thread make four objects", line):
+            elif re.match("Multi-thread make four objects", line):
                 make_real[make_4n], make_load[make_4n] = extr_make_t(columns)
-            if re.match("Multi-thread make eight objects", line):
+            elif re.match("Multi-thread make eight objects", line):
                 make_real[make_8n], make_load[make_8n] = extr_make_t(columns)
-            if re.match("(.*)sedov, weak", line):
-                b_type = sedov_weak
-            if re.match("(.*)sedov, strong", line):
-                b_type = sedov_strong
-            if re.match("(.*)maclaurin, weak", line):
-                b_type = maclaurin_weak
-            if re.match("(.*)maclaurin, strong", line):
-                b_type = maclaurin_strong
-            if re.match("(.*)crtest, weak", line):
-                b_type = crtest_weak
-            if re.match("(.*)crtest, strong", line):
-                b_type = crtest_strong
-            if (b_type in (crtest_weak, crtest_strong)):
-                d_col = 3
-            elif (b_type in (sedov_weak, sedov_strong)):
-                d_col = 6
-            elif (b_type in (maclaurin_weak, maclaurin_strong)):
-                d_col = 5
+            else:
+                if re.match("(.*)sedov, weak", line):
+                    b_type = sedov_weak
+                elif re.match("(.*)sedov, strong", line):
+                    b_type = sedov_strong
+                elif re.match("(.*)maclaurin, weak", line):
+                    b_type = maclaurin_weak
+                elif re.match("(.*)maclaurin, strong", line):
+                    b_type = maclaurin_strong
+                elif re.match("(.*)crtest, weak", line):
+                    b_type = crtest_weak
+                elif re.match("(.*)crtest, strong", line):
+                    b_type = crtest_strong
+
+                if (b_type in (crtest_weak, crtest_strong)):
+                    d_col = 3
+                elif (b_type in (sedov_weak, sedov_strong)):
+                    d_col = 6
+                elif (b_type in (maclaurin_weak, maclaurin_strong)):
+                    d_col = 5
+                elif (len(line.strip()) > 1):
+                    print "Unknown test: ", line.strip(), b_type
+                    exit(1)
             if (len(columns) > 0):
                 try:
                     nthr = int(columns[0])
