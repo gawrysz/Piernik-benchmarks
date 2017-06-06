@@ -1,0 +1,74 @@
+# test domains are scaled by factor of 2
+Preparing objects                real/user/sys/CPU%:   35.7   28.4   16.1  124.95%
+Single-thread make object        real/user/sys/CPU%:   74.6   68.4    6.4  100.32%
+Multi-thread make object         real/user/sys/CPU%:   81.9  162.1    7.5  206.99%
+Multi-thread make two objects    real/user/sys/CPU%:   89.1  316.1   13.7  369.85%
+Multi-thread make four objects   real/user/sys/CPU%:   97.9  561.6   30.4  604.56%
+Multi-thread make eight objects  real/user/sys/CPU%:  298.4 1792.3   74.9  625.77%
+
+Benchmarking sedov, weak scaling
+#Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
+1         4.20         4.09         4.10         4.01         4.13         4.106
+2         5.25         5.05         5.06         5.05         14.81        7.044
+3         18.30        17.83        17.88        17.98        18.15        18.028
+4         26.86        21.32        16.13        8.93         6.65         15.978
+5         10.49        9.84         10.22        9.89         9.84         10.056
+6         16.21        28.61        27.94        28.87        27.25        25.776
+7         31.15        31.02        30.27        30.74        30.13        30.662
+8         33.67        32.72        20.96        12.46        12.39        22.440
+
+Benchmarking sedov, strong scaling
+#Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
+1         4.19         3.99         4.00         4.02         4.06         4.052
+2         2.75         2.61         2.63         2.63         4.77         3.078
+3         7.46         7.25         7.24         7.24         7.37         7.312
+4         8.35         8.32         8.24         8.32         7.07         8.060
+5         8.38         7.90         8.11         7.99         8.04         8.084
+6         2.59         2.35         2.35         2.31         2.31         2.382
+7         2.79         2.53         2.55         2.56         2.59         2.604
+8         2.35         2.13         2.13         2.11         2.11         2.166
+
+Benchmarking crtest, weak scaling
+#Threads  MG_prepare  MG_cycle  Total_MG
+1         0.303       6.690     85.85
+2         0.342       1.540     23.79
+3         0.422       1.812     30.17
+4         2.561       8.422     130.8
+5         2.577       10.187    108.8
+6         0.892       3.587     102.0
+7         2.609       11.535    175.8
+8         0.963       3.644     73.61
+
+Benchmarking crtest, strong scaling
+#Threads  MG_prepare  MG_cycle  Total_MG
+1         1.063       6.713     90.43
+2         0.172       0.771     11.98
+3         0.143       0.600     9.308
+4         0.178       0.784     15.31
+5         0.483       2.301     35.14
+6         0.372       1.948     29.13
+7         0.364       1.606     25.32
+8         0.352       1.495     23.30
+
+Benchmarking maclaurin, weak scaling
+#Threads  MG_prepare  MG_i-cycle  MG_multipole  MG_o-cycle  Total_MG
+1         0.104       0.284       3.514         0.264       6.363
+2         0.185       0.485       3.358         0.450       8.227
+3         0.275       0.710       3.981         0.657       10.44
+4         0.374       0.961       7.216         0.932       16.18
+5         0.563       1.243       13.095        1.773       27.52
+6         0.862       2.102       23.982        1.901       42.83
+7         2.958       2.702       27.100        2.177       51.94
+8         4.132       2.830       17.056        2.076       43.48
+
+Benchmarking maclaurin, strong scaling
+#Threads  MG_prepare  MG_i-cycle  MG_multipole  MG_o-cycle  Total_MG
+1         5.178       3.506       53.923        6.438       112.1
+2         6.355       3.123       31.391        3.669       72.40
+3         4.751       2.970       9.676         1.822       37.49
+4         4.382       2.953       11.022        1.844       38.80
+5         5.339       4.163       22.759        2.956       62.78
+6         4.918       3.692       22.830        2.738       59.11
+7         4.521       2.927       11.081        1.959       39.23
+8         4.126       2.992       11.184        1.963       39.18
+
