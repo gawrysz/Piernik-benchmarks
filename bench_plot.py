@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 
+import argparse
+
 sedov_weak, sedov_strong, sedov_flood, maclaurin_weak, maclaurin_strong, maclaurin_flood, crtest_weak, crtest_strong, crtest_flood = range(9)
 make_prep, make_11, make_1n, make_2n, make_4n, make_8n = range(6)
 
+
 def extr_make_t(columns):
-    return float(columns[len(columns)-4]), float(columns[len(columns)-1].replace('%', ''))
+    return float(columns[len(columns) - 4]), float(columns[len(columns) - 1].replace('%', ''))
 
 
 def read_timings(file):
@@ -74,7 +77,7 @@ def read_timings(file):
                     elif (nthr > 0):
                         if (nthr not in timings):
                             timings[nthr] = [None for x in range(crtest_flood + 1)]
-                        if (len(columns) >= d_col+1):
+                        if (len(columns) >= d_col + 1):
                             timings[nthr][b_type] = float(columns[d_col])
                         else:
                             timings[nthr][b_type] = None
@@ -94,7 +97,7 @@ def mkrplot(rdata):
 
     plt.figure(figsize=(20, 15))
 
-    big=-1
+    big = -1
     for d in rdata:
         if (big < 0):
             big = rdata[d]["big"]
@@ -104,15 +107,15 @@ def mkrplot(rdata):
 
     m_labels = ["setup", "serial\nmake", "parallel\nmake", "parallel\nmake 2 obj.", "parallel\nmake 4 obj.", "parallel\nmake 8 obj."]
     t_labels = [
-        "sedov, weak scaling\nN_thr*{} x {} x {}, cartesian decomposition".format(64*big, 64*big, 64*big),
-        "sedov, strong scaling\n{} x {} x {}, cartesian decomposition".format(64*big, 64*big, 64*big),
-        "sedov, flood scaling\n{} x {} x {}, cartesian decomposition".format(64*big, 64*big, 64*big),
-        "maclaurin, weak scaling\nN_thr*{} x {} x {}, block decomposition 32 x 32 x 32".format(64*big, 64*big, 64*big),
-        "maclaurin, strong scaling\n{} x {} x {}, block decomposition 32 x 32 x 32".format(128*big, 128*big, 128*big),
-        "maclaurin, flood scaling\n{} x {} x {}, block decomposition 32 x 32 x 32".format(64*big, 64*big, 64*big),
-        "crtest, weak scaling\nN_thr*{} x {} x {}, noncartesian decomposition".format(32*big, 32*big, 32*big),
-        "crtest, strong scaling\n{} x {} x {}, noncartesian decomposition".format(32*big, 32*big, 32*big),
-        "crtest, flood scaling\n{} x {} x {}, noncartesian decomposition".format(32*big, 32*big, 32*big)
+        "sedov, weak scaling\nN_thr*{} x {} x {}, cartesian decomposition".format(64 * big, 64 * big, 64 * big),
+        "sedov, strong scaling\n{} x {} x {}, cartesian decomposition".format(64 * big, 64 * big, 64 * big),
+        "sedov, flood scaling\n{} x {} x {}, cartesian decomposition".format(64 * big, 64 * big, 64 * big),
+        "maclaurin, weak scaling\nN_thr*{} x {} x {}, block decomposition 32 x 32 x 32".format(64 * big, 64 * big, 64 * big),
+        "maclaurin, strong scaling\n{} x {} x {}, block decomposition 32 x 32 x 32".format(128 * big, 128 * big, 128 * big),
+        "maclaurin, flood scaling\n{} x {} x {}, block decomposition 32 x 32 x 32".format(64 * big, 64 * big, 64 * big),
+        "crtest, weak scaling\nN_thr*{} x {} x {}, noncartesian decomposition".format(32 * big, 32 * big, 32 * big),
+        "crtest, strong scaling\n{} x {} x {}, noncartesian decomposition".format(32 * big, 32 * big, 32 * big),
+        "crtest, flood scaling\n{} x {} x {}, noncartesian decomposition".format(32 * big, 32 * big, 32 * big)
     ]
 
     alph = 0.2
@@ -131,7 +134,7 @@ def mkrplot(rdata):
     plt.xticks(range(len(rdata[d]["avg"]["make_real"])), m_labels)
     plt.annotate("compilation time", xy=(0.5, 0.1), xycoords="axes fraction", horizontalalignment='center')
     plt.ylim(ymin=0.)
-    plt.xlim(-exp, len(m_labels)-1+exp)
+    plt.xlim(-exp, len(m_labels) - 1 + exp)
 
     sub = 2
     plt.subplot(4, 3, sub)
@@ -143,7 +146,7 @@ def mkrplot(rdata):
     plt.xticks(range(len(rdata[d]["avg"]["make_load"])), m_labels)
     plt.annotate("compilation CPU usage", xy=(0.5, 0.1), xycoords="axes fraction", horizontalalignment='center')
     plt.ylim(ymin=0.)
-    plt.xlim(-exp, len(m_labels)-1+exp)
+    plt.xlim(-exp, len(m_labels) - 1 + exp)
 
     ntm = 0
     for d in rdata:
@@ -188,7 +191,7 @@ def mkrplot(rdata):
             plt.ylabel("time [s]")
         plt.annotate(t_labels[test], xy=(0.5, 0.1), xycoords="axes fraction", horizontalalignment='center')
         plt.ylim(ymin=0.)
-        plt.xlim(1-exp, ntm+exp)
+        plt.xlim(1 - exp, ntm + exp)
 
         if (ntm >= 10):
             xf, xi = m.modf(m.log10(ntm))
@@ -200,17 +203,17 @@ def mkrplot(rdata):
                 xf = 5
             else:
                 xf = 2
-            xtstep = int(xf * m.pow(10, xi-1))
-            x_ticks = range(0, ntm+xtstep, xtstep)
+            xtstep = int(xf * m.pow(10, xi - 1))
+            x_ticks = range(0, ntm + xtstep, xtstep)
         else:
-            x_ticks = range(1, ntm+1)
+            x_ticks = range(1, ntm + 1)
         plt.xticks(x_ticks)
 
     names = []
     for d in rdata:
         names.append(d)
 
-    plt.subplots_adjust(top=0.95, bottom=0.05+0.025*int((len(rdata)-1)/2+1), left=0.04, right=0.99, wspace=0.15)
+    plt.subplots_adjust(top=0.95, bottom=0.05 + 0.025 * int((len(rdata) - 1) / 2 + 1), left=0.04, right=0.99, wspace=0.15)
     plt.figlegend((lines), names, loc="lower center", ncol=2, frameon=False)
     plt.annotate("Piernik benchmarks", xy=(0.5, 0.97), xycoords="figure fraction", horizontalalignment='center', size=20)
 
@@ -290,7 +293,6 @@ def reduce(data):
 
     return rd
 
-import argparse
 
 parser = argparse.ArgumentParser(description='''
 Show performance graphs from benchmark files.
