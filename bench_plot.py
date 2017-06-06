@@ -76,11 +76,8 @@ def read_timings(file):
                         print "Ignoring bogus thread number: ", columns
                     elif (nthr > 0):
                         if (nthr not in timings):
-                            timings[nthr] = [None for x in range(crtest_flood + 1)]
-                        if (len(columns) >= d_col + 1):
-                            timings[nthr][b_type] = float(columns[d_col])
-                        else:
-                            timings[nthr][b_type] = None
+                            timings[nthr] = [[] for x in range(crtest_flood + 1)]
+                        timings[nthr][b_type].append(float(columns[d_col]) if (len(columns) >= d_col + 1) else None)
                 except ValueError:
                     continue
 
@@ -222,15 +219,30 @@ def mkrplot(rdata):
 
 def singlesample(data):
     import os.path
+    import numpy as np
+    amm = ["avg", "min", "max"]
     rd = {}
     for d in data:
         d["dname"] = d["filename"]
         rd[d["dname"]] = {}
         rd[d["dname"]]["big"] = d["big"]
-        rd[d["dname"]]["avg"] = {}
-        for i in ("make_real", "make_load", "timings"):
-            rd[d["dname"]]["avg"][i] = d[i]
-
+        for a in amm:
+            rd[d["dname"]][a] = {}
+            rd[d["dname"]][a]["timings"] = {}
+        for i in ("make_real", "make_load"):
+            for a in amm:
+                rd[d["dname"]][a][i] = d[i]
+        for p in d["timings"]:
+            for a in amm:
+                rd[d["dname"]][a]["timings"][p] = []
+            for t in d["timings"][p]:
+                if (None in t):
+                    for a in amm:
+                        rd[d["dname"]][a]["timings"][p].append(None)
+                else:
+                    rd[d["dname"]]["avg"]["timings"][p].append(np.average(t))
+                    rd[d["dname"]]["min"]["timings"][p].append(np.min(t))
+                    rd[d["dname"]]["max"]["timings"][p].append(np.max(t))
     return rd
 
 
