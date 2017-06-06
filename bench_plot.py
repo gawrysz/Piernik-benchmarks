@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-sedov_weak, sedov_strong, maclaurin_weak, maclaurin_strong, crtest_weak, crtest_strong = range(6)
+sedov_weak, sedov_strong, sedov_flood, maclaurin_weak, maclaurin_strong, maclaurin_flood, crtest_weak, crtest_strong, crtest_flood = range(9)
 make_prep, make_11, make_1n, make_2n, make_4n, make_8n = range(6)
 
 def extr_make_t(columns):
@@ -41,24 +41,31 @@ def read_timings(file):
                     b_type = sedov_weak
                 elif re.match("(.*)sedov, strong", line):
                     b_type = sedov_strong
+                elif re.match("(.*)sedov, flood", line):
+                    b_type = sedov_flood
                 elif re.match("(.*)maclaurin, weak", line):
                     b_type = maclaurin_weak
                 elif re.match("(.*)maclaurin, strong", line):
                     b_type = maclaurin_strong
+                elif re.match("(.*)maclaurin, flood", line):
+                    b_type = maclaurin_flood
                 elif re.match("(.*)crtest, weak", line):
                     b_type = crtest_weak
                 elif re.match("(.*)crtest, strong", line):
                     b_type = crtest_strong
+                elif re.match("(.*)crtest, flood", line):
+                    b_type = crtest_flood
 
-                if (b_type in (crtest_weak, crtest_strong)):
+                if (b_type in (crtest_weak, crtest_strong, crtest_flood)):
                     d_col = 3
-                elif (b_type in (sedov_weak, sedov_strong)):
+                elif (b_type in (sedov_weak, sedov_strong, sedov_flood)):
                     d_col = 6
-                elif (b_type in (maclaurin_weak, maclaurin_strong)):
+                elif (b_type in (maclaurin_weak, maclaurin_strong, maclaurin_flood)):
                     d_col = 5
                 elif (len(line.strip()) > 1):
                     print "Unknown test: ", line.strip(), b_type
                     exit(1)
+
             if (len(columns) > 0):
                 try:
                     nthr = int(columns[0])
@@ -66,7 +73,7 @@ def read_timings(file):
                         print "Ignoring bogus thread number: ", columns
                     elif (nthr > 0):
                         if (nthr not in timings):
-                            timings[nthr] = [None for x in range(crtest_strong + 1)]
+                            timings[nthr] = [None for x in range(crtest_flood + 1)]
                         if (len(columns) >= d_col+1):
                             timings[nthr][b_type] = float(columns[d_col])
                         else:
@@ -95,14 +102,17 @@ def mkrplot(rdata):
             print "Mixed benchmark sizes"
             big = 0
 
-    m_labels = ["setup", "serial make", "parallel make", "parallel make\n2 objects", "parallel make\n4 objects", "parallel make\n8 objects"]
+    m_labels = ["setup", "serial\nmake", "parallel\nmake", "parallel\nmake 2 obj.", "parallel\nmake 4 obj.", "parallel\nmake 8 obj."]
     t_labels = [
-        "sedov, weak scaling, N_thr*{} x {} x {}, cartesian decomposition".format(64*big, 64*big, 64*big),
-        "sedov, strong scaling, {} x {} x {}, cartesian decomposition".format(64*big, 64*big, 64*big),
-        "maclaurin, weak scaling, N_thr*{} x {} x {}, block decomposition 32 x 32 x 32".format(64*big, 64*big, 64*big),
-        "maclaurin, strong scaling, {} x {} x {}, block decomposition 32 x 32 x 32".format(128*big, 128*big, 128*big),
-        "crtest, weak scaling, N_thr*{} x {} x {}, noncartesian decomposition".format(32*big, 32*big, 32*big),
-        "crtest, strong scaling, {} x {} x {}, noncartesian decomposition".format(32*big, 32*big, 32*big)
+        "sedov, weak scaling\nN_thr*{} x {} x {}, cartesian decomposition".format(64*big, 64*big, 64*big),
+        "sedov, strong scaling\n{} x {} x {}, cartesian decomposition".format(64*big, 64*big, 64*big),
+        "sedov, flood scaling\n{} x {} x {}, cartesian decomposition".format(64*big, 64*big, 64*big),
+        "maclaurin, weak scaling\nN_thr*{} x {} x {}, block decomposition 32 x 32 x 32".format(64*big, 64*big, 64*big),
+        "maclaurin, strong scaling\n{} x {} x {}, block decomposition 32 x 32 x 32".format(128*big, 128*big, 128*big),
+        "maclaurin, flood scaling\n{} x {} x {}, block decomposition 32 x 32 x 32".format(64*big, 64*big, 64*big),
+        "crtest, weak scaling\nN_thr*{} x {} x {}, noncartesian decomposition".format(32*big, 32*big, 32*big),
+        "crtest, strong scaling\n{} x {} x {}, noncartesian decomposition".format(32*big, 32*big, 32*big),
+        "crtest, flood scaling\n{} x {} x {}, noncartesian decomposition".format(32*big, 32*big, 32*big)
     ]
 
     alph = 0.2
@@ -110,7 +120,7 @@ def mkrplot(rdata):
     sub = 1
     lines = []
     ld = {}
-    plt.subplot(4, 2, sub)
+    plt.subplot(4, 3, sub)
     for d in rdata:
         l, = plt.plot(rdata[d]["avg"]["make_real"])
         if ("min" in rdata[d]):
@@ -124,7 +134,7 @@ def mkrplot(rdata):
     plt.xlim(-exp, len(m_labels)-1+exp)
 
     sub = 2
-    plt.subplot(4, 2, sub)
+    plt.subplot(4, 3, sub)
     for d in rdata:
         plt.plot(rdata[d]["avg"]["make_load"])
         if ("min" in rdata[d]):
@@ -140,9 +150,10 @@ def mkrplot(rdata):
         for k in rdata[d]["avg"]["timings"].keys():
             ntm = max(ntm, k)
 
-    for test in (sedov_weak, sedov_strong, maclaurin_weak, maclaurin_strong, crtest_weak, crtest_strong):
+    sub = 3
+    for test in (sedov_weak, sedov_strong, sedov_flood, maclaurin_weak, maclaurin_strong, maclaurin_flood, crtest_weak, crtest_strong, crtest_flood):
         sub += 1
-        plt.subplot(4, 2, sub)
+        plt.subplot(4, 3, sub)
         for d in rdata:
             n = rdata[d]["avg"]["timings"].keys()
             y = []
@@ -199,7 +210,7 @@ def mkrplot(rdata):
     for d in rdata:
         names.append(d)
 
-    plt.subplots_adjust(top=0.95, bottom=0.05+0.025*int((len(rdata)-1)/2+1), left=0.05, right=0.95, wspace=0.1)
+    plt.subplots_adjust(top=0.95, bottom=0.05+0.025*int((len(rdata)-1)/2+1), left=0.04, right=0.99, wspace=0.15)
     plt.figlegend((lines), names, loc="lower center", ncol=2, frameon=False)
     plt.annotate("Piernik benchmarks", xy=(0.5, 0.97), xycoords="figure fraction", horizontalalignment='center', size=20)
 
