@@ -5,6 +5,8 @@ import argparse
 sedov_weak, sedov_strong, sedov_flood, maclaurin_weak, maclaurin_strong, maclaurin_flood, crtest_weak, crtest_strong, crtest_flood = range(9)
 make_prep, make_11, make_1n, make_2n, make_4n, make_8n = range(6)
 
+amm = ["avg", "min", "max"]
+
 
 def extr_make_t(columns):
     return float(columns[len(columns) - 4]), float(columns[len(columns) - 1].replace('%', ''))
@@ -220,12 +222,12 @@ def mkrplot(rdata):
 def singlesample(data):
     import os.path
     import numpy as np
-    amm = ["avg", "min", "max"]
     rd = {}
     for d in data:
         d["dname"] = d["filename"]
         rd[d["dname"]] = {}
         rd[d["dname"]]["big"] = d["big"]
+        rd[d["dname"]]["weight"] = 1
         for a in amm:
             rd[d["dname"]][a] = {}
             rd[d["dname"]][a]["timings"] = {}
@@ -256,58 +258,39 @@ def reduce(data):
 
     rd = {}
     for d in data:
-        d["dname"] = os.path.dirname(d["filename"])
-        if (d["dname"] not in rd):
-            rd[d["dname"]] = {}
-            rd[d["dname"]]["big"] = d["big"]
-            rd[d["dname"]]["nt"] = 1
-            rd[d["dname"]]["nm"] = 0
-            if (np.product(d["make_real"]) * np.product(d["make_load"]) != 0):
-                rd[d["dname"]]["nm"] = 1
-            rd[d["dname"]]["avg"] = {}
-            for i in ("make_real", "make_load", "timings"):
-                rd[d["dname"]]["avg"][i] = d[i]
-            for i in ("min", "max"):
-                rd[d["dname"]][i] = deepcopy(rd[d["dname"]]["avg"])
+        name = os.path.dirname(d)
+        if (len(name) < 1):
+            name = d
+        if (name not in rd):
+            rd[name] = deepcopy(data[d])
         else:
-            if (rd[d["dname"]]["big"] != d["big"]):
-                print "Mixing different problem sizes (" + d["dname"] + ", " + d["filename"] + ")"
+            if (data[d]["big"] != rd[name]["big"]):
+                print "Mixing different problem sizes (" + d + ", " + name + ")"
                 exit(-2)
-            if (np.product(d["make_real"]) * np.product(d["make_load"]) != 0):
-                rd[d["dname"]]["nm"] += 1
-                for i in ("make_real", "make_load"):
-                    if (rd[d["dname"]]["nm"] > 1):
-                        rd[d["dname"]]["min"][i] = np.minimum(rd[d["dname"]]["min"][i], d[i])
-                        rd[d["dname"]]["max"][i] = np.maximum(rd[d["dname"]]["max"][i], d[i])
-                        rd[d["dname"]]["avg"][i] = np.add(rd[d["dname"]]["avg"][i], d[i])
-                if (rd[d["dname"]]["nm"] == 1):
-                    for i in ("make_real", "make_load"):
-                        rd[d["dname"]]["avg"][i] = d[i]
-                    for i in ("min", "max"):
-                        for j in ("make_real", "make_load"):
-                            rd[d["dname"]][i][j] = deepcopy(rd[d["dname"]]["avg"][j])
-            rd[d["dname"]]["nt"] += 1
-            for p in d["timings"]:
-                rd[d["dname"]]["min"]["timings"][p] = np.minimum(rd[d["dname"]]["min"]["timings"][p], d["timings"][p])
-                rd[d["dname"]]["max"]["timings"][p] = np.maximum(rd[d["dname"]]["max"]["timings"][p], d["timings"][p])
-                for i in range(len(rd[d["dname"]]["avg"]["timings"][p])):
-                    if (rd[d["dname"]]["avg"]["timings"][p][i] is None or d["timings"][p][i] is None):
-                        rd[d["dname"]]["avg"]["timings"][p][i] = None
-                    else:
-                        rd[d["dname"]]["avg"]["timings"][p][i] = rd[d["dname"]]["avg"]["timings"][p][i] + d["timings"][p][i]
-
-    for d in rd:
-        if (rd[d]["nm"] > 1):
             for i in ("make_real", "make_load"):
-                rd[d]["avg"][i] /= rd[d]["nm"]
-        if (rd[d]["nt"] > 1):
-            for p in rd[d]["avg"]["timings"]:
-                for i in range(len(rd[d]["avg"]["timings"][p])):
-                    if (rd[d]["avg"]["timings"][p][i] is not None):
-                        rd[d]["avg"]["timings"][p][i] /= rd[d]["nt"]
-
+                for v in range(len(rd[name]["avg"][i])):
+                    if (rd[name]["avg"][i][v] * data[d]["avg"][i][v] == 0.):
+                        rd[name]["avg"][i][v] = 0.
+                    else:
+                        rd[name]["avg"][i][v] = (rd[name]["weight"] * rd[name]["avg"][i][v] + data[d]["weight"] * data[d]["avg"][i][v]) / (rd[name]["weight"] + data[d]["weight"])
+                rd[name]["min"][i] = np.minimum(rd[name]["min"][i], data[d]["min"][i])
+                rd[name]["max"][i] = np.maximum(rd[name]["max"][i], data[d]["max"][i])
+            i = "timings"
+            for p in rd[name]["avg"][i].keys():
+                if (p not in data[d]["avg"][i]):
+                    for a in amm:
+                        del(rd[name][a][i][p])
+                else:
+                    for v in range(len(rd[name]["avg"][i][p])):
+                        if (rd[name]["avg"][i][p][v] is None or data[d]["avg"][i][p][v] is None):
+                            for a in amm:
+                                rd[name][a][i][p][v] = None
+                        else:
+                            rd[name]["avg"][i][p][v] = (rd[name]["weight"] * rd[name]["avg"][i][p][v] + data[d]["weight"] * data[d]["avg"][i][p][v]) / (rd[name]["weight"] + data[d]["weight"])
+                            rd[name]["min"][i][p][v] = min(rd[name]["min"][i][p][v], data[d]["min"][i][p][v])
+                            rd[name]["max"][i][p][v] = max(rd[name]["max"][i][p][v], data[d]["max"][i][p][v])
+            rd[name]["weight"] += 1
     return rd
-
 
 parser = argparse.ArgumentParser(description='''
 Show performance graphs from benchmark files.
@@ -322,9 +305,8 @@ data = []
 for f in args.file:
     data.append(read_timings(f))
 
-rdata = []
-if args.separate:
-    rdata = singlesample(data)
-else:
-    rdata = reduce(data)
+rdata = singlesample(data)
+if not args.separate:
+    rdata = reduce(rdata)
+
 mkrplot(rdata)
