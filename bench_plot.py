@@ -273,7 +273,10 @@ def reduce(data):
                         rd[name]["avg"][i][v] = 0.
                     else:
                         rd[name]["avg"][i][v] = (rd[name]["weight"] * rd[name]["avg"][i][v] + data[d]["weight"] * data[d]["avg"][i][v]) / (rd[name]["weight"] + data[d]["weight"])
-                rd[name]["min"][i] = np.minimum(rd[name]["min"][i], data[d]["min"][i])
+                    if (rd[name]["min"][i][v] == 0):
+                        rd[name]["min"][i][v] = data[d]["min"][i][v]
+                    elif (data[d]["min"][i][v] != 0):
+                        rd[name]["min"][i][v] = min(rd[name]["min"][i][v], data[d]["min"][i][v])
                 rd[name]["max"][i] = np.maximum(rd[name]["max"][i], data[d]["max"][i])
             i = "timings"
             for p in rd[name]["avg"][i].keys():
