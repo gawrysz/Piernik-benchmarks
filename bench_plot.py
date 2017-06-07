@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+from copy import deepcopy
 
 sedov_weak, sedov_strong, sedov_flood, maclaurin_weak, maclaurin_strong, maclaurin_flood, crtest_weak, crtest_strong, crtest_flood = range(9)
 make_prep, make_11, make_1n, make_2n, make_4n, make_8n = range(6)
@@ -233,7 +234,7 @@ def singlesample(data):
             rd[d["dname"]][a]["timings"] = {}
         for i in ("make_real", "make_load"):
             for a in amm:
-                rd[d["dname"]][a][i] = d[i]
+                rd[d["dname"]][a][i] = deepcopy(d[i])
         for p in d["timings"]:
             for a in amm:
                 rd[d["dname"]][a]["timings"][p] = []
@@ -254,7 +255,6 @@ def singlesample(data):
 def reduce(data):
     import os.path
     import numpy as np
-    from copy import deepcopy
 
     rd = {}
     for d in data:
