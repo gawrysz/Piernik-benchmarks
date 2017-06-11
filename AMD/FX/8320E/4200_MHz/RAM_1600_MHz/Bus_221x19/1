@@ -1,4 +1,3 @@
-nie, 3 kwi 2016, 22:21:09 CEST
 Benchmarking sedov, weak scaling
 #Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
 1         0.50         0.48         0.48         0.49         0.52         0.494
@@ -9,7 +8,6 @@ Benchmarking sedov, weak scaling
 6         0.84         0.80         0.79         0.80         0.81         0.808
 7         0.90         0.84         0.84         0.83         0.85         0.852
 8         0.95         0.88         0.87         0.87         0.86         0.886
-nie, 3 kwi 2016, 22:21:48 CEST
 
 Benchmarking sedov, strong scaling
 #Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
@@ -21,7 +19,6 @@ Benchmarking sedov, strong scaling
 6         0.19         0.18         0.18         0.18         0.18         0.182
 7         0.22         0.20         0.20         0.20         0.20         0.204
 8         0.17         0.16         0.16         0.16         0.16         0.162
-nie, 3 kwi 2016, 22:22:06 CEST
 
 Benchmarking crtest, weak scaling
 #Threads  MG_prepare  MG_cycle  Total_MG
@@ -33,7 +30,6 @@ Benchmarking crtest, weak scaling
 6         0.078       0.237     2.511
 7         0.079       0.239     2.530
 8         0.083       0.241     2.559
-nie, 3 kwi 2016, 22:22:37 CEST
 
 Benchmarking crtest, strong scaling
 #Threads  MG_prepare  MG_cycle  Total_MG
@@ -45,7 +41,6 @@ Benchmarking crtest, strong scaling
 6         0.011       0.042     0.4426
 7         0.010       0.037     0.3955
 8         0.010       0.033     0.3468
-nie, 3 kwi 2016, 22:22:52 CEST
 
 Benchmarking maclaurin, weak scaling
 #Threads  MG_prepare  MG_i-cycle  MG_multipole  MG_o-cycle  Total_MG
@@ -57,7 +52,6 @@ Benchmarking maclaurin, weak scaling
 6         0.030       0.077       1.209         0.073       1.922
 7         0.040       0.090       1.268         0.084       2.096
 8         0.044       0.106       1.342         0.100       2.322
-nie, 3 kwi 2016, 22:23:19 CEST
 
 Benchmarking maclaurin, strong scaling
 #Threads  MG_prepare  MG_i-cycle  MG_multipole  MG_o-cycle  Total_MG
@@ -69,5 +63,4 @@ Benchmarking maclaurin, strong scaling
 6         0.052       0.125       1.074         0.115       2.325
 7         0.051       0.125       1.022         0.116       2.273
 8         0.047       0.118       0.782         0.109       1.963
-nie, 3 kwi 2016, 22:24:05 CEST
 
