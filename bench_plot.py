@@ -158,7 +158,7 @@ def mkrplot(rdata):
         sub += 1
         plt.subplot(4, 3, sub)
         for d in rdata:
-            n = rdata[d]["avg"]["timings"].keys()
+            n = sorted(rdata[d]["avg"]["timings"].keys())
             y = []
             ymin = []
             ymax = []
