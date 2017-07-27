@@ -1,0 +1,43 @@
+Preparing objects                real/user/sys/CPU%:   29.9   15.4   13.2   95.80%
+Single-thread make object        real/user/sys/CPU%:  177.0  163.3    9.9   97.90%
+Multi-thread make object         real/user/sys/CPU%:  186.6  170.0    9.9   96.43%
+Multi-thread make two objects    real/user/sys/CPU%:  344.3  317.1   18.1   97.36%
+Multi-thread make four objects   real/user/sys/CPU%:  714.2  666.8   37.0   98.56%
+Multi-thread make eight objects  real/user/sys/CPU%: 1414.4 1314.9   72.9   98.12%
+
+Benchmarking sedov, flood scaling
+#Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
+1         2.07         2.02         2.02         2.04         2.09         2.048
+
+Benchmarking sedov, weak scaling
+#Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
+1         2.10         2.05         2.06         2.07         2.14         2.084
+
+Benchmarking sedov, strong scaling
+#Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
+1         2.05         1.98         1.99         2.02         2.07         2.022
+
+Benchmarking crtest, flood scaling
+#Threads  MG_prepare  MG_cycle  Total_MG
+1         0.111       0.494     5.178
+
+Benchmarking crtest, weak scaling
+#Threads  MG_prepare  MG_cycle  Total_MG
+1         0.109       0.483     5.027
+
+Benchmarking crtest, strong scaling
+#Threads  MG_prepare  MG_cycle  Total_MG
+1         0.109       0.496     5.192
+
+Benchmarking maclaurin, flood scaling
+#Threads  MG_prepare  MG_i-cycle  MG_multipole  MG_o-cycle  Total_MG
+1         0.049       0.135       2.875         0.120       4.071
+
+Benchmarking maclaurin, weak scaling
+#Threads  MG_prepare  MG_i-cycle  MG_multipole  MG_o-cycle  Total_MG
+1         0.049       0.137       2.850         0.123       4.075
+
+Benchmarking maclaurin, strong scaling
+#Threads  MG_prepare  MG_i-cycle  MG_multipole  MG_o-cycle  Total_MG
+1         0.392       1.061       11.395        0.991       22.06
+
