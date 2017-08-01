@@ -181,9 +181,13 @@ def mkrplot(rdata):
                     if (not ywhere[i]):
                         ymin[i] = 0.
                         ymax[i] = 0.
-            plt.plot(n, y)
+            if (len(n) > 1):
+                plt.plot(n, y)
+            else:
+                plt.plot(n, y, marker='o')
             if ("min" in rdata[d]):
-                plt.fill_between(n, ymin, ymax, alpha=alph, color=ld[d].get_color(), where=ywhere)
+                linew = 1 if (len(n) > 1) else 10
+                plt.fill_between(n, ymin, ymax, alpha=alph, color=ld[d].get_color(), where=ywhere, linewidth=linew)
         plt.xlabel("N_threads", verticalalignment='center')
         if (test in (sedov_strong, maclaurin_strong, crtest_strong)):
             plt.ylabel("time * N_threads [s]")
