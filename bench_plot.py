@@ -1,12 +1,25 @@
 #!/usr/bin/env python
 
+'''
+Problem:
+
+./bench_plot.py AMD/Ryzen/5/1600_3600_MHz/?
+Traceback (most recent call last):
+  File "./bench_plot.py", line 332, in <module>
+    mkrplot(rdata)
+  File "./bench_plot.py", line 172, in mkrplot
+    y2.append(math.sqrt(rdata[d]["avg2"]["timings"][x][test] - rdata[d]["avg"]["timings"][x][test]**2))
+ValueError: math domain error
+'''
+
 import argparse
+import math
 from copy import deepcopy
 
 sedov_weak, sedov_strong, sedov_flood, maclaurin_weak, maclaurin_strong, maclaurin_flood, crtest_weak, crtest_strong, crtest_flood = range(9)
 make_prep, make_11, make_1n, make_2n, make_4n, make_8n = range(6)
 
-amm = ["avg", "min", "max"]
+amm = ["avg", "avg2", "min", "max"]
 
 
 def extr_make_t(columns):
@@ -118,7 +131,8 @@ def mkrplot(rdata):
         "crtest, flood scaling\n{} x {} x {}, noncartesian decomposition".format(32 * big, 32 * big, 32 * big)
     ]
 
-    alph = 0.2
+    alph = 0.1
+    alph2 = 0.3
     exp = 0.25
     sub = 1
     lines = []
@@ -128,6 +142,7 @@ def mkrplot(rdata):
         l, = plt.plot(rdata[d]["avg"]["make_real"])
         if ("min" in rdata[d]):
             plt.fill_between(range(len(rdata[d]["avg"]["make_real"])), rdata[d]["min"]["make_real"], rdata[d]["max"]["make_real"], alpha=alph, color=l.get_color())
+            # plt.plot(np.sqrt(rdata[d]["avg2"]["make_real"]))
         lines.append(l)
         ld[d] = l
     plt.ylabel("time [s]")
@@ -142,6 +157,7 @@ def mkrplot(rdata):
         plt.plot(rdata[d]["avg"]["make_load"])
         if ("min" in rdata[d]):
             plt.fill_between(range(len(rdata[d]["avg"]["make_load"])), rdata[d]["min"]["make_load"], rdata[d]["max"]["make_load"], alpha=alph, color=ld[d].get_color())
+            # plt.plot(np.sqrt(rdata[d]["avg2"]["make_load"]))
     plt.ylabel("CPU load [%]")
     plt.xticks(range(len(rdata[d]["avg"]["make_load"])), m_labels)
     plt.annotate("compilation CPU usage", xy=(0.5, 0.1), xycoords="axes fraction", horizontalalignment='center')
@@ -162,8 +178,10 @@ def mkrplot(rdata):
             y = []
             ymin = []
             ymax = []
+            y2 = []
             for x in n:
                 y.append(rdata[d]["avg"]["timings"][x][test])
+                y2.append(math.sqrt(rdata[d]["avg2"]["timings"][x][test] - rdata[d]["avg"]["timings"][x][test]**2))
                 if ("min" in rdata[d]):
                     ymin.append(rdata[d]["min"]["timings"][x][test])
                     ymax.append(rdata[d]["max"]["timings"][x][test])
@@ -171,6 +189,7 @@ def mkrplot(rdata):
                 for i in range(len(y)):
                     if (y[i]):
                         y[i] *= n[i]
+                        y2[i] *= n[i]
                         if ("min" in rdata[d]):
                             ymin[i] *= n[i]
                             ymax[i] *= n[i]
@@ -188,6 +207,7 @@ def mkrplot(rdata):
             if ("min" in rdata[d]):
                 linew = 1 if (len(n) > 1) else 10
                 plt.fill_between(n, ymin, ymax, alpha=alph, color=ld[d].get_color(), where=ywhere, linewidth=linew)
+                plt.fill_between(n, np.subtract(y, y2), np.add(y, y2), alpha=alph2, color=ld[d].get_color(), where=ywhere, linewidth=linew)
         plt.xlabel("N_threads", verticalalignment='center')
         if (test in (sedov_strong, maclaurin_strong, crtest_strong)):
             plt.ylabel("time * N_threads [s]")
@@ -239,6 +259,7 @@ def singlesample(data):
         for i in ("make_real", "make_load"):
             for a in amm:
                 rd[d["dname"]][a][i] = deepcopy(d[i])
+            rd[d["dname"]]["avg2"][i] = np.square(deepcopy(d[i]))
         for p in d["timings"]:
             for a in amm:
                 rd[d["dname"]][a]["timings"][p] = []
@@ -253,6 +274,7 @@ def singlesample(data):
                     rd[d["dname"]]["avg"]["timings"][p].append(np.average(t))
                     rd[d["dname"]]["min"]["timings"][p].append(np.min(t))
                     rd[d["dname"]]["max"]["timings"][p].append(np.max(t))
+                    rd[d["dname"]]["avg2"]["timings"][p].append(np.average(np.square(t)))
     return rd
 
 
@@ -275,8 +297,10 @@ def reduce(data):
                 for v in range(len(rd[name]["avg"][i])):
                     if (rd[name]["avg"][i][v] * data[d]["avg"][i][v] == 0.):
                         rd[name]["avg"][i][v] = 0.
+                        rd[name]["avg2"][i][v] = 0.
                     else:
                         rd[name]["avg"][i][v] = (rd[name]["weight"] * rd[name]["avg"][i][v] + data[d]["weight"] * data[d]["avg"][i][v]) / (rd[name]["weight"] + data[d]["weight"])
+                        rd[name]["avg2"][i][v] = (rd[name]["weight"] * rd[name]["avg2"][i][v] + data[d]["weight"] * data[d]["avg2"][i][v]) / (rd[name]["weight"] + data[d]["weight"])
                     if (rd[name]["min"][i][v] == 0):
                         rd[name]["min"][i][v] = data[d]["min"][i][v]
                     elif (data[d]["min"][i][v] != 0):
@@ -296,6 +320,7 @@ def reduce(data):
                             rd[name]["avg"][i][p][v] = (rd[name]["weight"] * rd[name]["avg"][i][p][v] + data[d]["weight"] * data[d]["avg"][i][p][v]) / (rd[name]["weight"] + data[d]["weight"])
                             rd[name]["min"][i][p][v] = min(rd[name]["min"][i][p][v], data[d]["min"][i][p][v])
                             rd[name]["max"][i][p][v] = max(rd[name]["max"][i][p][v], data[d]["max"][i][p][v])
+                            rd[name]["avg2"][i][p][v] = (rd[name]["weight"] * rd[name]["avg2"][i][p][v] + data[d]["weight"] * data[d]["avg2"][i][p][v]) / (rd[name]["weight"] + data[d]["weight"])
             rd[name]["weight"] += 1
     return rd
 
