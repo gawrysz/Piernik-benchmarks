@@ -1,0 +1,83 @@
+# test domains are scaled by factor of 2
+Preparing objects                real/user/sys/CPU%:   13.1    8.8    6.6  117.55%
+Single-thread make object        real/user/sys/CPU%:   63.3   59.1    3.9   99.67%
+Multi-thread make object         real/user/sys/CPU%:   32.4   59.0    4.0  194.22%
+Multi-thread make two objects    real/user/sys/CPU%:   39.6  109.8    7.3  295.54%
+Multi-thread make four objects   real/user/sys/CPU%:   64.9  239.0   16.0  392.82%
+Multi-thread make eight objects  real/user/sys/CPU%:  124.0  452.1   30.0  388.63%
+
+Benchmarking sedov, flood scaling
+#Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
+1
+2         2
+3         3            3
+4         4            4            4
+
+Benchmarking sedov, weak scaling
+#Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
+1         5.74         5.55         5.55         5.57         5.63         5.608
+2         6.41         6.07         6.09         6.10         6.12         6.158
+3         7.37         7.01         7.00         6.99         7.00         7.074
+4         8.41         7.78         7.68         7.68         7.70         7.850
+
+Benchmarking sedov, strong scaling
+#Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
+1         5.72         5.55         5.56         5.57         5.63         5.606
+2         3.30         3.12         3.11         3.12         3.15         3.160
+3         2.62         2.44         2.45         2.45         2.46         2.484
+4         2.22         2.03         2.04         2.04         2.05         2.076
+
+Benchmarking crtest, flood scaling
+#Threads  MG_prepare  MG_cycle  Total_MG
+1         0.437       2.103     32.43
+2         0.437       2.110     32.54
+2         0.440       2.100     32.39
+3         0.451       2.148     33.23
+3         0.452       2.175     33.50
+3         0.454       2.138     32.87
+4         0.466       2.181     33.70
+4         0.449       2.201     33.95
+4         0.460       2.243     34.64
+4         0.465       2.176     33.62
+
+Benchmarking crtest, weak scaling
+#Threads  MG_prepare  MG_cycle  Total_MG
+1         0.435       2.103     32.43
+2         0.461       2.129     32.88
+3         0.514       2.208     34.18
+4         0.663       2.328     36.19
+
+Benchmarking crtest, strong scaling
+#Threads  MG_prepare  MG_cycle  Total_MG
+1         0.441       2.102     32.44
+2         0.229       1.059     16.36
+3         0.177       0.741     11.48
+4         0.135       0.560     8.672
+
+Benchmarking maclaurin, flood scaling
+#Threads  MG_prepare  MG_i-cycle  MG_multipole  MG_o-cycle  Total_MG
+1         0.153       0.455       5.798         0.429       10.37
+2         0.213       0.580       5.894         0.548       11.77
+2         0.212       0.582       5.877         0.549       11.76
+3         0.678       0.756       5.999         0.633       13.55
+3         0.240       0.712       6.264         0.555       12.76
+3         0.706       0.763       6.340         0.690       14.27
+4         3.179       1.369       6.705         0.645       19.33
+4         3.538       1.626       7.626         0.833       22.72
+4         3.430       1.587       7.010         0.795       21.62
+4         3.673       1.637       7.594         0.875       23.12
+
+Benchmarking maclaurin, weak scaling
+#Threads  MG_prepare  MG_i-cycle  MG_multipole  MG_o-cycle  Total_MG
+1         0.153       0.456       5.816         0.429       10.40
+2         0.218       0.604       5.040         0.565       11.12
+3         0.641       0.932       5.902         0.785       14.30
+4         4.795       1.916       7.872         1.004       25.35
+
+Benchmarking maclaurin, strong scaling
+#Threads  MG_prepare  MG_i-cycle  MG_multipole  MG_o-cycle  Total_MG
+1
+2
+3
+4
+
