@@ -29,7 +29,7 @@ def read_timings(file):
         for line in f:
             columns = line.split()
             if re.match("# test domains are scaled by factor of", line):
-                data["big"] = int(columns[-1])
+                data["big"] = float(columns[-1])
             elif re.match("Preparing objects", line):
                 make_real[make_prep], make_load[make_prep] = extr_make_t(columns)
             elif re.match("Single-thread make object", line):
