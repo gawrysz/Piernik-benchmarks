@@ -107,15 +107,15 @@ def mkrplot(rdata):
 
     m_labels = ["setup", "serial\nmake", "parallel\nmake", "parallel\nmake 2 obj.", "parallel\nmake 4 obj.", "parallel\nmake 8 obj."]
     t_labels = [
-        "sedov, weak scaling\nN_thr*{} x {} x {}, cartesian decomposition".format(64 * big, 64 * big, 64 * big),
-        "sedov, strong scaling\n{} x {} x {}, cartesian decomposition".format(64 * big, 64 * big, 64 * big),
-        "sedov, flood scaling\n{} x {} x {}, cartesian decomposition".format(64 * big, 64 * big, 64 * big),
-        "maclaurin, weak scaling\nN_thr*{} x {} x {}, block decomposition 32 x 32 x 32".format(64 * big, 64 * big, 64 * big),
-        "maclaurin, strong scaling\n{} x {} x {}, block decomposition 32 x 32 x 32".format(128 * big, 128 * big, 128 * big),
-        "maclaurin, flood scaling\n{} x {} x {}, block decomposition 32 x 32 x 32".format(64 * big, 64 * big, 64 * big),
-        "crtest, weak scaling\nN_thr*{} x {} x {}, noncartesian decomposition".format(32 * big, 32 * big, 32 * big),
-        "crtest, strong scaling\n{} x {} x {}, noncartesian decomposition".format(32 * big, 32 * big, 32 * big),
-        "crtest, flood scaling\n{} x {} x {}, noncartesian decomposition".format(32 * big, 32 * big, 32 * big)
+        "sedov, weak scaling\nN_thr*{} x {} x {}, cartesian decomposition".format(int(64 * big), int(64 * big), int(64 * big)),
+        "sedov, strong scaling\n{} x {} x {}, cartesian decomposition".format(int(64 * big), int(64 * big), int(64 * big)),
+        "sedov, flood scaling\n{} x {} x {}, cartesian decomposition".format(int(64 * big), int(64 * big), int(64 * big)),
+        "maclaurin, weak scaling\nN_thr*{} x {} x {}, block decomposition 32 x 32 x 32".format(int(64 * big), int(64 * big), int(64 * big)),
+        "maclaurin, strong scaling\n{} x {} x {}, block decomposition 32 x 32 x 32".format(int(128 * big), int(128 * big), int(128 * big)),
+        "maclaurin, flood scaling\n{} x {} x {}, block decomposition 32 x 32 x 32".format(int(64 * big), int(64 * big), int(64 * big)),
+        "crtest, weak scaling\nN_thr*{} x {} x {}, noncartesian decomposition".format(int(32 * big), int(32 * big), int(32 * big)),
+        "crtest, strong scaling\n{} x {} x {}, noncartesian decomposition".format(int(32 * big), int(32 * big), int(32 * big)),
+        "crtest, flood scaling\n{} x {} x {}, noncartesian decomposition".format(int(32 * big), int(32 * big), int(32 * big))
     ]
 
     alph = 0.2
