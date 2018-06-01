@@ -10,7 +10,7 @@ amm = ["avg", "min", "max"]
 
 
 def extr_make_t(columns):
-    return float(columns[len(columns) - 4]), float(columns[len(columns) - 1].replace('%', ''))
+    return float(columns[len(columns) - 4].replace(',', '.')), float(columns[len(columns) - 1].replace(',', '.').replace('%', ''))
 
 
 def read_timings(file):
