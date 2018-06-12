@@ -23,7 +23,7 @@ def read_timings(file):
         make_real = [0 for x in range(make_8n + 1)]
         make_load = [0 for x in range(make_8n + 1)]
         timings = {}
-        data["big"] = 1  # problem size factor
+        data["big"] = 1.  # problem size factor
 
         b_type = -1
         for line in f:
@@ -80,7 +80,7 @@ def read_timings(file):
                     elif (nthr > 0):
                         if (nthr not in timings):
                             timings[nthr] = [[] for x in range(crtest_flood + 1)]
-                        timings[nthr][b_type].append(float(columns[d_col]) if (len(columns) >= d_col + 1) else None)
+                        timings[nthr][b_type].append(float(columns[d_col])/(data["big"]**3) if (len(columns) >= d_col + 1) else None)
                 except ValueError:
                     continue
 
