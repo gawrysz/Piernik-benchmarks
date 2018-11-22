@@ -8,6 +8,7 @@ make_prep, make_11, make_1n, make_2n, make_4n, make_8n = range(6)
 
 amm = ["avg", "min", "max"]
 
+fig_lab_pos = (0.5, 0.1)  # (0.5, 0.8) for top placement
 
 def extr_make_t(columns):
     return float(columns[len(columns) - 4].replace(',', '.')), float(columns[len(columns) - 1].replace(',', '.').replace('%', ''))
@@ -132,7 +133,7 @@ def mkrplot(rdata):
         ld[d] = l
     plt.ylabel("time [s]")
     plt.xticks(range(len(rdata[d]["avg"]["make_real"])), m_labels)
-    plt.annotate("compilation time", xy=(0.5, 0.1), xycoords="axes fraction", horizontalalignment='center')
+    plt.annotate("compilation time", xy=fig_lab_pos, xycoords="axes fraction", horizontalalignment='center')
     plt.ylim(ymin=0.)
     plt.xlim(-exp, len(m_labels) - 1 + exp)
 
@@ -144,7 +145,7 @@ def mkrplot(rdata):
             plt.fill_between(range(len(rdata[d]["avg"]["make_load"])), rdata[d]["min"]["make_load"], rdata[d]["max"]["make_load"], alpha=alph, color=ld[d].get_color())
     plt.ylabel("CPU load [%]")
     plt.xticks(range(len(rdata[d]["avg"]["make_load"])), m_labels)
-    plt.annotate("compilation CPU usage", xy=(0.5, 0.1), xycoords="axes fraction", horizontalalignment='center')
+    plt.annotate("compilation CPU usage", xy=fig_lab_pos, xycoords="axes fraction", horizontalalignment='center')
     plt.ylim(ymin=0.)
     plt.xlim(-exp, len(m_labels) - 1 + exp)
 
@@ -193,7 +194,7 @@ def mkrplot(rdata):
             plt.ylabel("time * N_threads [s]")
         else:
             plt.ylabel("time [s]")
-        plt.annotate(t_labels[test], xy=(0.5, 0.1), xycoords="axes fraction", horizontalalignment='center')
+        plt.annotate(t_labels[test], xy=fig_lab_pos, xycoords="axes fraction", horizontalalignment='center')
         plt.ylim(ymin=0.)
         plt.xlim(1 - exp, ntm + exp)
 
