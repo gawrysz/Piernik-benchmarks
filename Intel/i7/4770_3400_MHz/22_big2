@@ -6,16 +6,6 @@ Multi-thread make two objects    real/user/sys/CPU%:   23.0   88.1    4.5  401.9
 Multi-thread make four objects   real/user/sys/CPU%:   35.3  217.5   10.2  644.85%
 Multi-thread make eight objects  real/user/sys/CPU%:   65.7  467.9   19.9  742.21%
 
-Benchmarking sedov, flood scaling
-#Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
-1
-2         2
-3         3            3
-4         4            4            4
-5         5            5            5            5
-6         6            6            6            6            6
-7         7            7            7            7            7            7
-8         8            8            8            8            8            8                   8
 
 Benchmarking sedov, weak scaling
 #Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
