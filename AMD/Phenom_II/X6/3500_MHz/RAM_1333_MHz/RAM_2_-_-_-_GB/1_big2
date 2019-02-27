@@ -11,9 +11,6 @@ Benchmarking sedov, weak scaling
 1         5.47         5.25         5.26         5.27         5.30         5.310
 2         6.40         6.06         6.07         6.08         6.09         6.140
 3         7.25         6.78         6.78         6.79         6.80         6.880
-4         11.97        18.34        18.33        21.44        24.52        18.920
-5         25.07        28.74        29.94        30.84        29.59        28.836
-6         34.82        33.06        33.85        33.24        33.91        33.776
 
 Benchmarking sedov, strong scaling
 #Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
@@ -45,11 +42,6 @@ Benchmarking crtest, strong scaling
 Benchmarking maclaurin, weak scaling
 #Threads  MG_prepare  MG_i-cycle  MG_multipole  MG_o-cycle  Total_MG
 1         0.148       0.387       4.337         0.358       8.212
-2         2.311       1.233       5.258         0.607       16.21
-3         5.983       2.220       7.617         0.881       26.98
-4         9.026       3.179       15.721        2.834       52.39
-5         11.549      4.472       24.399        3.938       75.98
-6
 
 Benchmarking maclaurin, strong scaling
 #Threads  MG_prepare  MG_i-cycle  MG_multipole  MG_o-cycle  Total_MG
