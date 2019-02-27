@@ -9,25 +9,25 @@ Multi-thread make eight objects  real/user/sys/CPU%:   39.7  300.3   29.5  829.3
 Benchmarking sedov, flood scaling
 #Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
 1
-2         2
-3         3            3
-4         4            4            4
-5         5            5            5            5
-6         6            6            6            6            6
-7         7            7            7            7            7            7
-8         8            8            8            8            8            8                   8
-9         9            9            9            9            9            9                   9   9
-10        10           10           10           10           10           10                  10  10  10
-11        11           11           11           11           11           11                  11  11  11  11
-12        12           12           12           12           12           12                  12  12  12  12  12
-13        13           13           13           13           13           13                  13  13  13  13  13  13
-14        14           14           14           14           14           14                  14  14  14  14  14  14  14
-15        15           15           15           15           15           15                  15  15  15  15  15  15  15  15
-16        16           16           16           16           16           16                  16  16  16  16  16  16  16  16  16
-17        17           17           17           17           17           17                  17  17  17  17  17  17  17  17  17  17
-18        18           18           18           18           18           18                  18  18  18  18  18  18  18  18  18  18  18
-19        19           19           19           19           19           19                  19  19  19  19  19  19  19  19  19  19  19  19
-20        20           20           20           20           20           20                  20  20  20  20  20  20  20  20  20  20  20  20  20
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
 
 Benchmarking sedov, weak scaling
 #Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
@@ -563,12 +563,12 @@ Benchmarking maclaurin, weak scaling
 12        0.260       0.716       4.119         0.663       10.64
 13        0.312       0.767       4.426         0.704       11.39
 14        0.330       0.831       5.054         0.770       12.62
-15        0.359       0.898       12.588        0.936       21.51
-16        0.414       0.959       23.694        1.221       34.73
-17        0.433       1.032
-18        0.434       1.137
-19        0.624       1.442
-20        2.427       1.872
+15
+16
+17
+18
+19
+20
 
 Benchmarking maclaurin, strong scaling
 #Threads  MG_prepare  MG_i-cycle  MG_multipole  MG_o-cycle  Total_MG
