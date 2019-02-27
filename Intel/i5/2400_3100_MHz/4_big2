@@ -65,20 +65,11 @@ Benchmarking maclaurin, flood scaling
 1        0.068      0.201      3.186        0.186      5.187    
 2        0.097      0.268      3.392        0.240      6.014    
 2        0.097      0.268      3.304        0.238      5.918    
-3        1.281      1.094      6.804        0.233      13.87    
-3        2.636      0.874      7.012        0.211      14.42    
-3        2.558      1.426      4.652        0.198      14.11    
-4        21.584     6.327      15.824       0.196      63.90    
-4        28.669     5.358      24.062       0.296      75.95    
-4        21.956     6.012      16.508       0.217      63.83    
-4        30.920     5.759      22.018       0.197      77.17    
 
 Benchmarking maclaurin, weak scaling
 #Threads MG_prepare MG_i-cycle MG_multipole MG_o-cycle Total_MG 
 1        0.069      0.201      3.180        0.186      5.180    
 2        0.100      0.273      2.908        0.253      5.639    
-3        1.244      1.381      8.826        0.334      17.69    
-4        21.266     5.819      23.130       0.569      73.17    
 
 Benchmarking maclaurin, strong scaling
 #Threads MG_prepare MG_i-cycle MG_multipole MG_o-cycle Total_MG 
