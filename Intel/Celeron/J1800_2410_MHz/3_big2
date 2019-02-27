@@ -41,13 +41,10 @@ Benchmarking crtest, strong scaling
 Benchmarking maclaurin, flood scaling
 #Threads MG_prepare MG_i-cycle MG_multipole MG_o-cycle Total_MG 
 1        0.169      0.625      9.914        0.589      16.15    
-2        65.566     14.824     36.566       0.761      166.2    
-2        77.680     15.690     35.739       0.604      180.0    
 
 Benchmarking maclaurin, weak scaling
 #Threads MG_prepare MG_i-cycle MG_multipole MG_o-cycle Total_MG 
 1        0.168      0.632      9.912        0.599      16.23    
-2        76.333     14.411     94.213       0.904      233.6    
 
 Benchmarking maclaurin, strong scaling
 #Threads MG_prepare MG_i-cycle MG_multipole MG_o-cycle Total_MG 
