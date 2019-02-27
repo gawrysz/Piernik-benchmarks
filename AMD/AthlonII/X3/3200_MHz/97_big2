@@ -65,7 +65,7 @@ Benchmarking maclaurin, weak scaling
 
 Benchmarking maclaurin, strong scaling
 #Threads MG_prepare MG_i-cycle MG_multipole MG_o-cycle Total_MG 
-1        90.786     23.671     67.947       2.740      270.0    
-2        0.000      0.000      80.869       1.908      298.8    
-3        97.062     26.446     84.718       1.927      301.6    
+1
+2
+3
 
