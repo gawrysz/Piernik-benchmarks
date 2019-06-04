@@ -1,36 +1,55 @@
+## model name : AArch64 Processor rev 2 (aarch64)
+## Memory : 1.77832 GB
+Preparing objects                real/user/sys/CPU%:    68.5    18.6     8.2   39.33%
+Single-thread make object        real/user/sys/CPU%:   206.2   339.0     8.3  168.42%
+Multi-thread make object         real/user/sys/CPU%:   206.6   339.1     8.9  168.48%
+Multi-thread make two objects    real/user/sys/CPU%:   272.9   653.3    17.9  245.97%
+Multi-thread make four objects   real/user/sys/CPU%:   431.4  1347.0    36.4  320.69%
+
 Benchmarking sedov, flood scaling
-#Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
-1         2.83         2.76         2.73         2.74         2.74         2.760
+#Threads dWallClock1 dWallClock2 dWallClock3 dWallClock4 dWallClock5 dWallClock_Average 
+1 2.84 2.71 2.77 2.76 2.80 2.776 
+2 2.83 2.79 2.82 2.78 2.79 2.802 
+2 2.85 2.79 2.80 2.77 2.79 2.800 
 
 Benchmarking sedov, weak scaling
-#Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
-1         nan
+#Threads dWallClock1 dWallClock2 dWallClock3 dWallClock4 dWallClock5 dWallClock_Average 
+1 2.86 2.76 2.77 2.77 2.80 2.792 
+2 3.01 2.87 2.88 2.90 2.91 2.914 
 
 Benchmarking sedov, strong scaling
-#Threads  dWallClock1  dWallClock2  dWallClock3  dWallClock4  dWallClock5  dWallClock_Average
-1         nan
+#Threads dWallClock1 dWallClock2 dWallClock3 dWallClock4 dWallClock5 dWallClock_Average 
+1 2.80 2.74 2.71 2.78 2.78 2.762 
+2 1.70 1.64 1.60 1.60 1.61 1.630 
 
 Benchmarking crtest, flood scaling
-#Threads  MG_prepare  MG_cycle  Total_MG
-1         0.182       0.831     8.662
+#Threads MG_prepare MG_cycle Total_MG 
+1 0.186 0.845 8.747 
+2 0.183 0.826 8.629 
+2 0.186 0.831 8.663 
 
 Benchmarking crtest, weak scaling
-#Threads  MG_prepare  MG_cycle  Total_MG
-18.720
+#Threads MG_prepare MG_cycle Total_MG 
+1 0.190 0.857 8.970 
+2 0.194 0.861 9.001 
 
 Benchmarking crtest, strong scaling
-#Threads  MG_prepare  MG_cycle  Total_MG
-18.617
+#Threads MG_prepare MG_cycle Total_MG 
+1 0.192 0.834 8.777 
+2 0.100 0.426 4.467 
 
 Benchmarking maclaurin, flood scaling
-#Threads  MG_prepare  MG_i-cycle  MG_multipole  MG_o-cycle  Total_MG
-1         0.061       0.170       6.106         0.150       7.605
+#Threads MG_prepare MG_i-cycle MG_multipole MG_o-cycle Total_MG 
+##   skipped flood : (RAM) 1821 <  ##
+##   skipped flood : (RAM) 1821 <  ##
 
 Benchmarking maclaurin, weak scaling
-#Threads  MG_prepare  MG_i-cycle  MG_multipole  MG_o-cycle  Total_MG
-17.548
+#Threads MG_prepare MG_i-cycle MG_multipole MG_o-cycle Total_MG 
+##  1 skipped weak : (RAM) 1821 <  ##
+##  2 skipped weak : (RAM) 1821 <  ##
 
 Benchmarking maclaurin, strong scaling
-#Threads  MG_prepare  MG_i-cycle  MG_multipole  MG_o-cycle  Total_MG
-1
+#Threads MG_prepare MG_i-cycle MG_multipole MG_o-cycle Total_MG 
+##  1 skipped strong : (RAM) 1821 <  ##
+##  2 skipped strong : (RAM) 1821 <  ##
 
