@@ -1,0 +1,5 @@
+Ubuntu:
+sudo apt install python-matplotlib
+
+Fedora
+sudo dnf install python2-matplotlib
