@@ -1,0 +1,58 @@
+## model name : Pentium(R) Dual-Core CPU E5200 @ 2.50GHz
+## Memory : 3.80176 GB
+# test domains are scaled by factor of 1.5
+Preparing objects                real/user/sys/CPU%:    30.0     9.9    24.8  115.77%
+Single-thread make object        real/user/sys/CPU%:   109.4    89.1    24.0  103.37%
+Multi-thread make object         real/user/sys/CPU%:    77.8    97.4    24.4  156.57%
+Multi-thread make two objects    real/user/sys/CPU%:   124.7   187.8    45.7  187.30%
+Multi-thread make four objects   real/user/sys/CPU%:   259.5   397.6    95.1  189.89%
+Multi-thread make eight objects  real/user/sys/CPU%:   510.5   787.1   186.5  190.69%
+
+Benchmarking sedov, flood scaling
+#Threads dWallClock1 dWallClock2 dWallClock3 dWallClock4 dWallClock5 dWallClock_Average 
+1        3.35        3.31        3.25        3.27        3.36        3.308              
+2        3.87        3.71        4.01        3.79        3.62        3.800              
+2        3.87        3.71        3.90        3.86        3.62        3.792              
+
+Benchmarking sedov, weak scaling
+#Threads dWallClock1 dWallClock2 dWallClock3 dWallClock4 dWallClock5 dWallClock_Average 
+1        3.38        3.25        3.33        3.27        3.32        3.310              
+2        4.24        3.86        4.63        3.87        3.89        4.098              
+
+Benchmarking sedov, strong scaling
+#Threads dWallClock1 dWallClock2 dWallClock3 dWallClock4 dWallClock5 dWallClock_Average 
+1        3.34        3.30        3.26        3.26        3.32        3.296              
+2        2.46        2.10        2.11        2.11        2.13        2.182              
+
+Benchmarking crtest, flood scaling
+#Threads MG_prepare MG_cycle Total_MG 
+1        0.226      1.035    13.90    
+2        0.236      1.051    14.59    
+2        0.243      1.059    14.89    
+
+Benchmarking crtest, weak scaling
+#Threads MG_prepare MG_cycle Total_MG 
+1        0.221      1.024    13.84    
+2        0.246      1.097    14.65    
+
+Benchmarking crtest, strong scaling
+#Threads MG_prepare MG_cycle Total_MG 
+1        0.242      1.022    13.84    
+2        0.125      0.566    7.441    
+
+Benchmarking maclaurin, flood scaling
+#Threads MG_prepare MG_i-cycle MG_multipole MG_o-cycle Total_MG 
+1        0.089      0.248      4.398        0.251      6.760    
+2        0.147      0.368      5.124        0.341      8.483    
+2        0.153      0.370      5.258        0.342      8.636    
+
+Benchmarking maclaurin, weak scaling
+#Threads MG_prepare MG_i-cycle MG_multipole MG_o-cycle Total_MG 
+1        0.090      0.248      4.425        0.230      6.675    
+2        0.159      0.391      5.065        0.362      8.647    
+
+Benchmarking maclaurin, strong scaling
+#Threads MG_prepare MG_i-cycle MG_multipole MG_o-cycle Total_MG 
+1        3.098      2.678      19.310       1.941      42.98    
+2        
+
