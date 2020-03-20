@@ -160,6 +160,7 @@ def mkrplot(rdata):
     for test in (sedov_weak, sedov_strong, sedov_flood, maclaurin_weak, maclaurin_strong, maclaurin_flood, crtest_weak, crtest_strong, crtest_flood):
         sub += 1
         plt.subplot(4, 3, sub)
+        ym = []
         for d in rdata:
             n = sorted(rdata[d]["avg"]["timings"].keys())
             y = []
@@ -191,13 +192,17 @@ def mkrplot(rdata):
             if ("min" in rdata[d]):
                 linew = 1 if (len(n) > 1) else 10
                 plt.fill_between(n, ymin, ymax, alpha=alph, color=ld[d].get_color(), where=ywhere, linewidth=linew)
+            ym.append(max(y))
+        ymax = plt.ylim()[1]
+        if (ymax > 1.5 * max(ym)):
+            ymax = 1.2 * max(ym)
         plt.xlabel("N_threads", verticalalignment='center')
         if (test in (sedov_strong, maclaurin_strong, crtest_strong)):
             plt.ylabel("time * N_threads [s]")
         else:
             plt.ylabel("time [s]")
         plt.annotate(t_labels[test], xy=fig_lab_pos, xycoords="axes fraction", horizontalalignment='center')
-        plt.ylim(ymin=0.)
+        plt.ylim([0., ymax])
         plt.xlim(1 - exp, ntm + exp)
 
         if (ntm >= 10):
