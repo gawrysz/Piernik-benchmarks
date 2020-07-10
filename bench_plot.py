@@ -3,8 +3,8 @@
 import argparse
 from copy import deepcopy
 
-sedov_weak, sedov_strong, sedov_flood, maclaurin_weak, maclaurin_strong, maclaurin_flood, crtest_weak, crtest_strong, crtest_flood = range(9)
-make_prep, make_11, make_1n, make_2n, make_4n, make_8n = range(6)
+sedov_weak, sedov_strong, sedov_flood, maclaurin_weak, maclaurin_strong, maclaurin_flood, crtest_weak, crtest_strong, crtest_flood = list(range(9))
+make_prep, make_11, make_1n, make_2n, make_4n, make_8n = list(range(6))
 
 amm = ["avg", "min", "max"]
 
@@ -72,14 +72,14 @@ def read_timings(file):
                 elif (b_type in (maclaurin_weak, maclaurin_strong, maclaurin_flood)):
                     d_col = 5
                 elif (len(line.strip()) > 1):
-                    print "Unknown test: ", line.strip(), b_type
+                    print("Unknown test: ", line.strip(), b_type)
                     exit(1)
 
             if (len(columns) > 0):
                 try:
                     nthr = int(columns[0])
                     if (nthr > 2**20):  # crude protection against eating too much memory due to bad data lines
-                        print "Ignoring bogus thread number: ", columns
+                        print("Ignoring bogus thread number: ", columns)
                     elif (nthr > 0):
                         if (nthr not in timings):
                             timings[nthr] = [[] for x in range(crtest_flood + 1)]
@@ -105,7 +105,7 @@ def mkrplot(rdata):
         if (big < 0):
             big = rdata[d]["big"]
         elif (big != rdata[d]["big"]):
-            print "Mixed benchmark sizes"
+            print("Mixed benchmark sizes")
             big = 0
 
     m_labels = ["setup", "serial\nmake", "parallel\nmake", "parallel\nmake 2 obj.", "parallel\nmake 4 obj.", "parallel\nmake 8 obj."]
@@ -130,11 +130,11 @@ def mkrplot(rdata):
     for d in rdata:
         l, = plt.plot(rdata[d]["avg"]["make_real"])
         if ("min" in rdata[d]):
-            plt.fill_between(range(len(rdata[d]["avg"]["make_real"])), rdata[d]["min"]["make_real"], rdata[d]["max"]["make_real"], alpha=alph, color=l.get_color())
+            plt.fill_between(list(range(len(rdata[d]["avg"]["make_real"]))), rdata[d]["min"]["make_real"], rdata[d]["max"]["make_real"], alpha=alph, color=l.get_color())
         lines.append(l)
         ld[d] = l
     plt.ylabel("time [s]")
-    plt.xticks(range(len(rdata[d]["avg"]["make_real"])), m_labels)
+    plt.xticks(list(range(len(rdata[d]["avg"]["make_real"]))), m_labels)
     plt.annotate("compilation time", xy=fig_lab_pos, xycoords="axes fraction", horizontalalignment='center')
     plt.ylim(ymin=0.)
     plt.xlim(-exp, len(m_labels) - 1 + exp)
@@ -144,16 +144,16 @@ def mkrplot(rdata):
     for d in rdata:
         plt.plot(rdata[d]["avg"]["make_load"])
         if ("min" in rdata[d]):
-            plt.fill_between(range(len(rdata[d]["avg"]["make_load"])), rdata[d]["min"]["make_load"], rdata[d]["max"]["make_load"], alpha=alph, color=ld[d].get_color())
+            plt.fill_between(list(range(len(rdata[d]["avg"]["make_load"]))), rdata[d]["min"]["make_load"], rdata[d]["max"]["make_load"], alpha=alph, color=ld[d].get_color())
     plt.ylabel("CPU load [%]")
-    plt.xticks(range(len(rdata[d]["avg"]["make_load"])), m_labels)
+    plt.xticks(list(range(len(rdata[d]["avg"]["make_load"]))), m_labels)
     plt.annotate("compilation CPU usage", xy=fig_lab_pos, xycoords="axes fraction", horizontalalignment='center')
     plt.ylim(ymin=0.)
     plt.xlim(-exp, len(m_labels) - 1 + exp)
 
     ntm = 0
     for d in rdata:
-        for k in rdata[d]["avg"]["timings"].keys():
+        for k in list(rdata[d]["avg"]["timings"].keys()):
             ntm = max(ntm, k)
 
     sub = 3
@@ -216,9 +216,9 @@ def mkrplot(rdata):
             else:
                 xf = 2
             xtstep = int(xf * m.pow(10, xi - 1))
-            x_ticks = range(0, ntm + xtstep, xtstep)
+            x_ticks = list(range(0, ntm + xtstep, xtstep))
         else:
-            x_ticks = range(1, ntm + 1)
+            x_ticks = list(range(1, ntm + 1))
         plt.xticks(x_ticks)
 
     names = []
@@ -277,7 +277,7 @@ def reduce(data):
             rd[name] = deepcopy(data[d])
         else:
             if (data[d]["big"] != rd[name]["big"]):
-                print "Mixing different problem sizes (" + d + ", " + name + ")"
+                print("Mixing different problem sizes (" + d + ", " + name + ")")
                 exit(-2)
             for i in ("make_real", "make_load"):
                 for v in range(len(rd[name]["avg"][i])):
@@ -291,7 +291,7 @@ def reduce(data):
                         rd[name]["min"][i][v] = min(rd[name]["min"][i][v], data[d]["min"][i][v])
                 rd[name]["max"][i] = np.maximum(rd[name]["max"][i], data[d]["max"][i])
             i = "timings"
-            for p in rd[name]["avg"][i].keys():
+            for p in list(rd[name]["avg"][i].keys()):
                 if (p not in data[d]["avg"][i]):
                     for a in amm:
                         del(rd[name][a][i][p])
