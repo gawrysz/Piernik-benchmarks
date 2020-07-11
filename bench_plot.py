@@ -192,7 +192,10 @@ def mkrplot(rdata):
             if ("min" in rdata[d]):
                 linew = 1 if (len(n) > 1) else 10
                 plt.fill_between(n, ymin, ymax, alpha=alph, color=ld[d].get_color(), where=ywhere, linewidth=linew)
-            ym.append(max(filter(lambda v: v is not None, y)))
+            try:
+                ym.append(max(filter(lambda v: v is not None, y)))
+            except ValueError:
+                pass
         ymax = plt.ylim()[1]
         if (ymax > 1.5 * max(ym)):
             ymax = 1.2 * max(ym)
