@@ -197,8 +197,11 @@ def mkrplot(rdata):
             except ValueError:
                 pass
         ymax = plt.ylim()[1]
-        if (ymax > 1.5 * max(ym)):
-            ymax = 1.2 * max(ym)
+        try:
+            if (ymax > 1.5 * max(ym)):
+                ymax = 1.2 * max(ym)
+        except ValueError:
+            pass
         plt.xlabel("N_threads", verticalalignment='center')
         if (test in (sedov_strong, maclaurin_strong, crtest_strong)):
             plt.ylabel("time * N_threads [s]")
