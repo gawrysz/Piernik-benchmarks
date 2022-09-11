@@ -110,15 +110,15 @@ def mkrplot(rdata):
 
     m_labels = ["setup", "serial\nmake", "parallel\nmake", "parallel\nmake 2 obj.", "parallel\nmake 4 obj.", "parallel\nmake 8 obj."]
     t_labels = [
-        "sedov, weak scaling\nN_thr*{} x {} x {}, cartesian decomposition".format(int(64 * big), int(64 * big), int(64 * big)),
+        "sedov, weak scaling\nN_thr * {} x {} x {}, cartesian decomposition".format(int(64 * big), int(64 * big), int(64 * big)),
         "sedov, strong scaling\n{} x {} x {}, cartesian decomposition".format(int(64 * big), int(64 * big), int(64 * big)),
-        "sedov, flood scaling\n{} x {} x {}, cartesian decomposition".format(int(64 * big), int(64 * big), int(64 * big)),
-        "maclaurin, weak scaling\nN_thr*{} x {} x {}, block decomposition 32 x 32 x 32".format(int(64 * big), int(64 * big), int(64 * big)),
+        "sedov, flood scaling, {} x {} x {}".format(int(64 * big), int(64 * big), int(64 * big)),
+        "maclaurin, weak scaling\nN_thr * {} x {} x {}, block decomposition 32 x 32 x 32".format(int(64 * big), int(64 * big), int(64 * big)),
         "maclaurin, strong scaling\n{} x {} x {}, block decomposition 32 x 32 x 32".format(int(128 * big), int(128 * big), int(128 * big)),
         "maclaurin, flood scaling\n{} x {} x {}, block decomposition 32 x 32 x 32".format(int(64 * big), int(64 * big), int(64 * big)),
-        "crtest, weak scaling\nN_thr*{} x {} x {}, noncartesian decomposition".format(int(32 * big), int(32 * big), int(32 * big)),
+        "crtest, weak scaling\nN_thr * {} x {} x {}, noncartesian decomposition".format(int(32 * big), int(32 * big), int(32 * big)),
         "crtest, strong scaling\n{} x {} x {}, noncartesian decomposition".format(int(32 * big), int(32 * big), int(32 * big)),
-        "crtest, flood scaling\n{} x {} x {}, noncartesian decomposition".format(int(32 * big), int(32 * big), int(32 * big))
+        "crtest, flood scaling, {} x {} x {}".format(int(32 * big), int(32 * big), int(32 * big))
     ]
 
     alph = 0.2
@@ -202,7 +202,9 @@ def mkrplot(rdata):
                 ymax = 1.2 * max(ym)
         except ValueError:
             pass
-        plt.xlabel("N_threads", verticalalignment='center')
+
+        xla = "N independent threads" if test in (sedov_flood, maclaurin_flood, crtest_flood) else "N_threads (MPI-1)"
+        plt.xlabel(xla, verticalalignment='center')
         if (test in (sedov_strong, maclaurin_strong, crtest_strong)):
             plt.ylabel("time * N_threads [s]")
         else:
