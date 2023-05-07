@@ -136,7 +136,10 @@ def mkrplot(rdata):
     plt.ylabel("time [s]")
     plt.xticks(list(range(len(rdata[d]["avg"]["make_real"]))), m_labels)
     plt.annotate("compilation time", xy=fig_lab_pos, xycoords="axes fraction", horizontalalignment='center')
-    plt.ylim(ymin=0.)
+    if args.log and plt.ylim()[0]>0:
+        plt.yscale("log")
+    else:
+        plt.ylim(ymin=0.)
     plt.xlim(-exp, len(m_labels) - 1 + exp)
 
     sub = 2
@@ -210,7 +213,10 @@ def mkrplot(rdata):
         else:
             plt.ylabel("time [s]")
         plt.annotate(t_labels[test], xy=fig_lab_pos, xycoords="axes fraction", horizontalalignment='center')
-        plt.ylim([0., ymax])
+        if args.log and plt.ylim()[0]>0:  # don't crash on empty plots
+            plt.yscale("log")
+        else:
+            plt.ylim([0., ymax])
         plt.xlim(1 - exp, ntm + exp)
 
         if (ntm >= 10):
@@ -228,6 +234,7 @@ def mkrplot(rdata):
         else:
             x_ticks = list(range(1, ntm + 1))
         plt.xticks(x_ticks)
+
 
     names = []
     for d in rdata:
@@ -321,7 +328,8 @@ By default the data files are grouped by the parent directory.
 If there are more files in the same directory, an average is computed and also minimum and maximum values are indicated by shading.
 ''')
 parser.add_argument('file', nargs='+', metavar='benchmark_file', help='file with results obtained by piernik_bench')
-parser.add_argument('-s', '--separate', action='store_true', help='do not group the graphs, plot them separately')
+parser.add_argument('-s', '--separate', action='store_true', help='do not group the graphs according to their directories, plot them separately')
+parser.add_argument('-l', '--log', action='store_true', help='use logarithmic scale for the measured execution time')
 args = parser.parse_args()
 
 data = []
