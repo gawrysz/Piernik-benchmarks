@@ -10,6 +10,7 @@ amm = ["avg", "min", "max"]
 
 fig_lab_pos = (0.5, 0.1)  # (0.5, 0.8) for top placement
 
+
 def extr_make_t(columns):
     return float(columns[len(columns) - 4].replace(',', '.')), float(columns[len(columns) - 1].replace(',', '.').replace('%', ''))
 
@@ -83,7 +84,7 @@ def read_timings(file):
                     elif (nthr > 0):
                         if (nthr not in timings):
                             timings[nthr] = [[] for x in range(crtest_flood + 1)]
-                        timings[nthr][b_type].append(float(columns[d_col])/(data["big"]**3) if (len(columns) >= d_col + 1) else None)
+                        timings[nthr][b_type].append(float(columns[d_col]) / (data["big"]**3) if (len(columns) >= d_col + 1) else None)
                 except ValueError:
                     continue
 
@@ -136,7 +137,10 @@ def mkrplot(rdata):
     plt.ylabel("time [s]")
     plt.xticks(list(range(len(rdata[d]["avg"]["make_real"]))), m_labels)
     plt.annotate("compilation time", xy=fig_lab_pos, xycoords="axes fraction", horizontalalignment='center')
-    plt.ylim(ymin=0.)
+    if args.log and plt.ylim()[0] > 0:
+        plt.yscale("log")
+    else:
+        plt.ylim(ymin=0.)
     plt.xlim(-exp, len(m_labels) - 1 + exp)
 
     sub = 2
@@ -210,7 +214,10 @@ def mkrplot(rdata):
         else:
             plt.ylabel("time [s]")
         plt.annotate(t_labels[test], xy=fig_lab_pos, xycoords="axes fraction", horizontalalignment='center')
-        plt.ylim([0., ymax])
+        if args.log and plt.ylim()[0] > 0:  # don't crash on empty plots
+            plt.yscale("log")
+        else:
+            plt.ylim([0., ymax])
         plt.xlim(1 - exp, ntm + exp)
 
         if (ntm >= 10):
@@ -302,7 +309,7 @@ def reduce(data):
             for p in list(rd[name]["avg"][i].keys()):
                 if (p not in data[d]["avg"][i]):
                     for a in amm:
-                        del(rd[name][a][i][p])
+                        del (rd[name][a][i][p])
                 else:
                     for v in range(len(rd[name]["avg"][i][p])):
                         if (rd[name]["avg"][i][p][v] is None or data[d]["avg"][i][p][v] is None):
@@ -315,13 +322,15 @@ def reduce(data):
             rd[name]["weight"] += 1
     return rd
 
+
 parser = argparse.ArgumentParser(description='''
 Show performance graphs from benchmark files.
 By default the data files are grouped by the parent directory.
 If there are more files in the same directory, an average is computed and also minimum and maximum values are indicated by shading.
 ''')
 parser.add_argument('file', nargs='+', metavar='benchmark_file', help='file with results obtained by piernik_bench')
-parser.add_argument('-s', '--separate', action='store_true', help='do not group the graphs, plot them separately')
+parser.add_argument('-s', '--separate', action='store_true', help='do not group the graphs according to their directories, plot them separately')
+parser.add_argument('-l', '--log', action='store_true', help='use logarithmic scale for the measured execution time')
 args = parser.parse_args()
 
 data = []
