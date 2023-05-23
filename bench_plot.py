@@ -99,7 +99,7 @@ def mkrplot(rdata):
     import math as m
     import numpy as np
 
-    plt.figure(figsize=(20, 15))
+    plt.figure(figsize=(24, 18))
 
     big = -1
     for d in rdata:
@@ -165,6 +165,7 @@ def mkrplot(rdata):
         sub += 1
         plt.subplot(4, 3, sub)
         ym = []
+        has_data = False
         for d in rdata:
             n = sorted(rdata[d]["avg"]["timings"].keys())
             y = []
@@ -191,6 +192,9 @@ def mkrplot(rdata):
                         ymax[i] = 0.
             if (len(n) > 1):
                 plt.plot(n, y)
+                for x in y:
+                    if x is not None:
+                        has_data = True
             else:
                 plt.plot(n, y, marker='o')
             if ("min" in rdata[d]):
@@ -214,7 +218,7 @@ def mkrplot(rdata):
         else:
             plt.ylabel("time [s]")
         plt.annotate(t_labels[test], xy=fig_lab_pos, xycoords="axes fraction", horizontalalignment='center')
-        if args.log and plt.ylim()[0] > 0:  # don't crash on empty plots
+        if args.log and has_data:  # don't crash on empty plots
             plt.yscale("log")
         else:
             plt.ylim([0., ymax])
