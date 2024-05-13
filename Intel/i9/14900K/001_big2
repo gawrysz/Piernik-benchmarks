@@ -1208,7 +1208,7 @@ Benchmarking crtest, strong scaling
 29       0.011      0.032    0.5076   
 30       0.011      0.031    0.4861   
 31       0.010      0.030    0.4748   
-32       0.380      0.040    2.116    
+#32       0.380      0.040    2.116    
 
 Benchmarking maclaurin, flood scaling
 #Threads MG_prepare MG_i-cycle MG_multipole MG_o-cycle Total_MG 
