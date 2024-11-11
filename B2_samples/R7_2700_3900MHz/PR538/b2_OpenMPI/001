@@ -1,0 +1,57 @@
+## model name : AMD Ryzen 7 2700 Eight-Core Processor
+## Memory : 31.2773 GB
+Preparing objects                real/user/sys/CPU%:    26,0    14,5    12,0  102,27%
+Single-thread make object        real/user/sys/CPU%:    81,7    72,0     7,9   97,82%
+Multi-thread make object         real/user/sys/CPU%:    35,8    78,0     7,5  239,16%
+Multi-thread make two objects    real/user/sys/CPU%:    37,2   155,9    13,6  454,79%
+Multi-thread make four objects   real/user/sys/CPU%:    48,3   383,7    29,3  854,24%
+Multi-thread make eight objects  real/user/sys/CPU%:    75,6   865,7    61,2 1224,77%
+
+## nie, 21 maj 2023, 00:40:11 CEST
+Benchmarking sedov, flood scaling
+#Threads dWallClock1 dWallClock2 dWallClock3 dWallClock4 dWallClock5 dWallClock_Average 
+2        0.26        0.27        0.26        0.25        0.26        0.260              
+2        0.27        0.26        0.26        0.26        0.25        0.260              
+
+## nie, 21 maj 2023, 00:40:16 CEST
+Benchmarking sedov, strong scaling
+#Threads dWallClock1 dWallClock2 dWallClock3 dWallClock4 dWallClock5 dWallClock_Average 
+2        0.15        0.15        0.17        0.16        0.16        0.158              
+
+## nie, 21 maj 2023, 00:40:19 CEST
+Benchmarking sedov, weak scaling
+#Threads dWallClock1 dWallClock2 dWallClock3 dWallClock4 dWallClock5 dWallClock_Average 
+2        0.27        0.27        0.27        0.27        0.27        0.270              
+
+## nie, 21 maj 2023, 00:40:24 CEST
+Benchmarking crtest, flood scaling
+#Threads MG_prepare MG_cycle Total_MG 
+2        0.025      0.108    1.131    
+2        0.025      0.106    1.100    
+
+## nie, 21 maj 2023, 00:40:28 CEST
+Benchmarking crtest, strong scaling
+#Threads MG_prepare MG_cycle Total_MG 
+2        0.016      0.059    0.6085   
+
+## nie, 21 maj 2023, 00:40:32 CEST
+Benchmarking crtest, weak scaling
+#Threads MG_prepare MG_cycle Total_MG 
+2        0.026      0.116    1.225    
+
+## nie, 21 maj 2023, 00:40:36 CEST
+Benchmarking maclaurin, flood scaling
+#Threads MG_prepare MG_i-cycle MG_multipole MG_o-cycle Total_MG 
+2        0.007      0.020      0.278        0.017      0.4518   
+2        0.006      0.020      0.275        0.017      0.4472   
+
+## nie, 21 maj 2023, 00:40:41 CEST
+Benchmarking maclaurin, strong scaling
+#Threads MG_prepare MG_i-cycle MG_multipole MG_o-cycle Total_MG 
+2        0.037      0.099      0.611        0.087      1.575    
+
+## nie, 21 maj 2023, 00:40:52 CEST
+Benchmarking maclaurin, weak scaling
+#Threads MG_prepare MG_i-cycle MG_multipole MG_o-cycle Total_MG 
+2        0.009      0.023      0.268        0.021      0.4765   
+
