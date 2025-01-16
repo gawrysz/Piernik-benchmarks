@@ -113,14 +113,14 @@ def update_make_times(line: str, columns: List[str], make_real: List[float], mak
         return False
     return True
 
-def process_timing_data(columns: List[str], data: Dict, timings: Dict, b_type: int, d_col: int) -> None:
+def process_timing_data(columns: List[str], data: Dict[str, float], timings: Dict[int, List[List[float]]], b_type: int, d_col: int) -> None:
     """
     Processes timing data from the columns and updates the timings dictionary.
 
     Args:
         columns (List[str]): List of columns from the input file.
-        data (Dict): Dictionary to store the processed data.
-        timings (Dict): Dictionary to store timing data.
+        data (Dict[str, float]): Dictionary to store the processed data.
+        timings (Dict[int, List[List[float]]]): Dictionary to store timing data.
         b_type (int): Benchmark type.
         d_col (int): Data column index.
     """
@@ -136,17 +136,17 @@ def process_timing_data(columns: List[str], data: Dict, timings: Dict, b_type: i
         if not re.match("#", columns[0]):
             logging.warning(f"ValueError encountered while processing columns: {columns}")
 
-def process_line(line: str, columns: List[str], data: Dict, make_real: List[float], make_load: List[float], timings: Dict, b_type: int, d_col: int) -> Tuple[int, int]:
+def process_line(line: str, columns: List[str], data: Dict[str, float], make_real: List[float], make_load: List[float], timings: Dict[int, List[List[float]]], b_type: int, d_col: int) -> Tuple[int, int]:
     """
     Processes a line from the input file and updates the data structures.
 
     Args:
         line (str): Line from the input file.
         columns (List[str]): List of columns from the input file.
-        data (Dict): Dictionary to store the processed data.
+        data (Dict[str, float]): Dictionary to store the processed data.
         make_real (List[float]): List to store make real times.
         make_load (List[float]): List to store make load values.
-        timings (Dict): Dictionary to store timing data.
+        timings (Dict[int, List[List[float]]]): Dictionary to store timing data.
         b_type (int): Benchmark type.
         d_col (int): Data column index.
 
@@ -170,7 +170,7 @@ def process_line(line: str, columns: List[str], data: Dict, make_real: List[floa
     return b_type, d_col
 
 # Read timings from a benchmark file
-def read_timings(file: str) -> Dict:
+def read_timings(file: str) -> Dict[str, float]:
     """
     Reads timings from a benchmark file and processes the data.
 
@@ -178,7 +178,7 @@ def read_timings(file: str) -> Dict:
         file (str): Path to the benchmark file.
 
     Returns:
-        Dict: A dictionary containing the processed data.
+        Dict[str, float]: A dictionary containing the processed data.
     """
     logging.info(f"Reading timings from file: {file}")
     data = {}
@@ -210,12 +210,12 @@ def read_timings(file: str) -> Dict:
 
 
 # Plot the benchmark results
-def mkrplot(rdata: Dict, args: argparse.Namespace, output_file: str = None) -> None:
+def mkrplot(rdata: Dict[str, float], args: argparse.Namespace, output_file: str = None) -> None:
     """
     Plots the benchmark results using matplotlib.
 
     Args:
-        rdata (Dict): Dictionary containing the reduced data.
+        rdata (Dict[str, float]): Dictionary containing the reduced data.
         args (argparse.Namespace): Parsed command-line arguments.
         output_file (str, optional): Path to save the plot. Defaults to None.
     """
@@ -376,15 +376,15 @@ def mkrplot(rdata: Dict, args: argparse.Namespace, output_file: str = None) -> N
 
 
 # Create a single sample from the data
-def singlesample(data: List[Dict]) -> Dict:
+def singlesample(data: List[Dict[str, float]]) -> Dict[str, float]:
     """
     Creates a single sample from the given data.
 
     Args:
-        data (List[Dict]): List of dictionaries containing the data.
+        data (List[Dict[str, float]]): List of dictionaries containing the data.
 
     Returns:
-        Dict: A dictionary containing the single sample.
+        Dict[str, float]: A dictionary containing the single sample.
     """
     rd = {}
     for d in data:
@@ -430,15 +430,15 @@ def average_values(weight1: float, value1: float, weight2: float, value2: float)
     return (weight1 * value1 + weight2 * value2) / (weight1 + weight2)
 
 # Reduce the data by averaging results from the same directory
-def reduce(data: Dict) -> Dict:
+def reduce(data: Dict[str, float]) -> Dict[str, float]:
     """
     Reduces the data by averaging results from the same directory.
 
     Args:
-        data (Dict): Dictionary containing the data.
+        data (Dict[str, float]): Dictionary containing the data.
 
     Returns:
-        Dict: A dictionary containing the reduced data.
+        Dict[str, float]: A dictionary containing the reduced data.
     """
     rd = {}
     for d in data:
