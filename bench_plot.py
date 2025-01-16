@@ -7,6 +7,10 @@ import matplotlib.pyplot as plt
 import math as m
 import numpy as np
 import os.path
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Define constants for benchmark types and make stages
 sedov_weak, sedov_strong, sedov_flood, maclaurin_weak, maclaurin_strong, maclaurin_flood, crtest_weak, crtest_strong, crtest_flood = list(range(9))
@@ -42,6 +46,7 @@ def read_timings(file: str) -> dict:
     Returns:
         dict: A dictionary containing the processed data.
     """
+    logging.info(f"Reading timings from file: {file}")
     data = {}
     data["filename"] = file
     try:
@@ -106,7 +111,7 @@ def read_timings(file: str) -> dict:
                 elif b_type in (maclaurin_weak, maclaurin_strong, maclaurin_flood):
                     d_col = 5
                 elif len(line.strip()) > 1:
-                    print("Unknown test: ", line.strip(), b_type)
+                    logging.error(f"Unknown test: {line.strip()}, {b_type}")
                     exit(1)
 
                 # Process timing data
@@ -114,7 +119,7 @@ def read_timings(file: str) -> dict:
                     try:
                         nthr = int(columns[0])
                         if nthr > 2**20:  # crude protection against eating too much memory due to bad data lines
-                            print("Ignoring bogus thread number: ", columns)
+                            logging.warning(f"Ignoring bogus thread number: {columns}")
                         elif nthr > 0:
                             if nthr not in timings:
                                 timings[nthr] = [[] for x in range(crtest_flood + 1)]
@@ -126,10 +131,10 @@ def read_timings(file: str) -> dict:
             data["make_load"] = make_load
             data["timings"] = timings
     except FileNotFoundError:
-        print(f"File not found: {file}")
+        logging.error(f"File not found: {file}")
         exit(1)
     except IOError:
-        print(f"Error reading file: {file}")
+        logging.error(f"Error reading file: {file}")
         exit(1)
     
     return data
