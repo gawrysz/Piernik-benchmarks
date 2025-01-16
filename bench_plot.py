@@ -451,18 +451,25 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument('-o', '--output', metavar='output_file', help='file to save the plot')
     return parser.parse_args()
 
-# Argument parser setup
-args = parse_arguments()
+def main() -> None:
+    """
+    Main function to execute the script.
+    """
+    # Argument parser setup
+    args = parse_arguments()
 
-# Validate input files
-validate_files(args.file)
+    # Validate input files
+    validate_files(args.file)
 
-data = []
-for f in args.file:
-    data.append(read_timings(f))
+    data = []
+    for f in args.file:
+        data.append(read_timings(f))
 
-rdata = singlesample(data)
-if not args.separate:
-    rdata = reduce(rdata)
+    rdata = singlesample(data)
+    if not args.separate:
+        rdata = reduce(rdata)
 
-mkrplot(rdata, args.output)
+    mkrplot(rdata, args.output)
+
+if __name__ == "__main__":
+    main()
