@@ -103,6 +103,7 @@ def process_line(line: str, columns: List[str], data: Dict, make_real: List[floa
     """
     if re.match("# test domains are scaled by factor of", line):
         data["big"] = float(columns[-1])
+        logging.debug(f"Set problem size factor to {data['big']}")
     elif re.match("Preparing objects", line):
         make_real[make_prep], make_load[make_prep] = extr_make_t(columns)
     elif re.match("Single-thread make object", line):
@@ -120,6 +121,7 @@ def process_line(line: str, columns: List[str], data: Dict, make_real: List[floa
         if new_b_type != -1:
             b_type = new_b_type
             d_col = determine_data_column(b_type)
+            logging.debug(f"Detected benchmark type: {b_type}, data column: {d_col}")
         if d_col != -1 and len(columns) > 0:
             try:
                 nthr = int(columns[0])
@@ -130,7 +132,8 @@ def process_line(line: str, columns: List[str], data: Dict, make_real: List[floa
                         timings[nthr] = [[] for _ in range(crtest_flood + 1)]
                     timings[nthr][b_type].append(float(columns[d_col]) / (data["big"]**3) if len(columns) >= d_col + 1 else None)
             except ValueError:
-                pass
+                if not re.match("#", line) and new_b_type == -1:
+                    logging.warning(f"ValueError encountered while processing line: {line.strip()}")
     return b_type, d_col
 
 # Read timings from a benchmark file
