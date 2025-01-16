@@ -3,6 +3,7 @@
 import argparse
 from copy import deepcopy
 
+# Define constants for benchmark types and make stages
 sedov_weak, sedov_strong, sedov_flood, maclaurin_weak, maclaurin_strong, maclaurin_flood, crtest_weak, crtest_strong, crtest_flood = list(range(9))
 make_prep, make_11, make_1n, make_2n, make_4n, make_8n = list(range(6))
 
@@ -10,13 +11,12 @@ amm = ["avg", "min", "max"]
 
 fig_lab_pos = (0.5, 0.1)  # (0.5, 0.8) for top placement
 
-
+# Extract make time and load from columns
 def extr_make_t(columns):
     return float(columns[len(columns) - 4].replace(',', '.')), float(columns[len(columns) - 1].replace(',', '.').replace('%', ''))
 
-
+# Read timings from a benchmark file
 def read_timings(file):
-
     import re  # overkill, I know
 
     data = {}
@@ -47,6 +47,7 @@ def read_timings(file):
             elif re.match("Multi-thread make eight objects", line):
                 make_real[make_8n], make_load[make_8n] = extr_make_t(columns)
             else:
+                # Determine benchmark type
                 if re.match("(.*)sedov, weak", line):
                     b_type = sedov_weak
                 elif re.match("(.*)sedov, strong", line):
@@ -66,6 +67,7 @@ def read_timings(file):
                 elif re.match("(.*)crtest, flood", line):
                     b_type = crtest_flood
 
+                # Determine data column based on benchmark type
                 if (b_type in (crtest_weak, crtest_strong, crtest_flood)):
                     d_col = 3
                 elif (b_type in (sedov_weak, sedov_strong, sedov_flood)):
@@ -76,6 +78,7 @@ def read_timings(file):
                     print("Unknown test: ", line.strip(), b_type)
                     exit(1)
 
+            # Process timing data
             if (len(columns) > 0):
                 try:
                     nthr = int(columns[0])
@@ -93,7 +96,7 @@ def read_timings(file):
     data["timings"] = timings
     return data
 
-
+# Plot the benchmark results
 def mkrplot(rdata):
     import matplotlib.pyplot as plt
     import math as m
@@ -250,7 +253,7 @@ def mkrplot(rdata):
 
     plt.show()
 
-
+# Create a single sample from the data
 def singlesample(data):
     import os.path
     import numpy as np
@@ -282,7 +285,7 @@ def singlesample(data):
                     rd[d["dname"]]["max"]["timings"][p].append(np.max(t))
     return rd
 
-
+# Reduce the data by averaging results from the same directory
 def reduce(data):
     import os.path
     import numpy as np
@@ -326,7 +329,7 @@ def reduce(data):
             rd[name]["weight"] += 1
     return rd
 
-
+# Argument parser setup
 parser = argparse.ArgumentParser(description='''
 Show performance graphs from benchmark files.
 By default the data files are grouped by the parent directory.
