@@ -314,10 +314,7 @@ def singlesample(data: list[dict]) -> dict:
             for a in amm:
                 rd[d["dname"]][a]["timings"][p] = []
             for t in d["timings"][p]:
-                if (len(t) == 0):
-                    for a in amm:
-                        rd[d["dname"]][a]["timings"][p].append(None)
-                elif (None in t):
+                if len(t) == 0 or None in t:
                     for a in amm:
                         rd[d["dname"]][a]["timings"][p].append(None)
                 else:
