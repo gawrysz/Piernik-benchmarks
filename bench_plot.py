@@ -11,9 +11,11 @@ amm = ["avg", "min", "max"]
 
 fig_lab_pos = (0.5, 0.1)  # (0.5, 0.8) for top placement
 
+
 # Extract make time and load from columns
 def extr_make_t(columns):
     return float(columns[len(columns) - 4].replace(',', '.')), float(columns[len(columns) - 1].replace(',', '.').replace('%', ''))
+
 
 # Read timings from a benchmark file
 def read_timings(file):
@@ -95,6 +97,7 @@ def read_timings(file):
     data["make_load"] = make_load
     data["timings"] = timings
     return data
+
 
 # Plot the benchmark results
 def mkrplot(rdata):
@@ -253,6 +256,7 @@ def mkrplot(rdata):
 
     plt.show()
 
+
 # Create a single sample from the data
 def singlesample(data):
     import os.path
@@ -284,6 +288,7 @@ def singlesample(data):
                     rd[d["dname"]]["min"]["timings"][p].append(np.min(t))
                     rd[d["dname"]]["max"]["timings"][p].append(np.max(t))
     return rd
+
 
 # Reduce the data by averaging results from the same directory
 def reduce(data):
@@ -328,6 +333,7 @@ def reduce(data):
                             rd[name]["max"][i][p][v] = max(rd[name]["max"][i][p][v], data[d]["max"][i][p][v])
             rd[name]["weight"] += 1
     return rd
+
 
 # Argument parser setup
 parser = argparse.ArgumentParser(description='''
