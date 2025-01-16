@@ -432,17 +432,26 @@ def validate_files(files: list[str]) -> None:
             logging.error(f"File not readable: {file}")
             raise IOError(f"File not readable: {file}")
 
+def parse_arguments() -> argparse.Namespace:
+    """
+    Parses command-line arguments.
+
+    Returns:
+        argparse.Namespace: Parsed command-line arguments.
+    """
+    parser = argparse.ArgumentParser(description='''
+    Show performance graphs from benchmark files.
+    By default the data files are grouped by the parent directory.
+    If there are more files in the same directory, an average is computed and also minimum and maximum values are indicated by shading.
+    ''')
+    parser.add_argument('file', nargs='+', metavar='benchmark_file', help='file with results obtained by piernik_bench')
+    parser.add_argument('-s', '--separate', action='store_true', help='do not group the graphs according to their directories, plot them separately')
+    parser.add_argument('-l', '--log', action='store_true', help='use logarithmic scale for the measured execution time')
+    parser.add_argument('-o', '--output', metavar='output_file', help='file to save the plot')
+    return parser.parse_args()
+
 # Argument parser setup
-parser = argparse.ArgumentParser(description='''
-Show performance graphs from benchmark files.
-By default the data files are grouped by the parent directory.
-If there are more files in the same directory, an average is computed and also minimum and maximum values are indicated by shading.
-''')
-parser.add_argument('file', nargs='+', metavar='benchmark_file', help='file with results obtained by piernik_bench')
-parser.add_argument('-s', '--separate', action='store_true', help='do not group the graphs according to their directories, plot them separately')
-parser.add_argument('-l', '--log', action='store_true', help='use logarithmic scale for the measured execution time')
-parser.add_argument('-o', '--output', metavar='output_file', help='file to save the plot')
-args = parser.parse_args()
+args = parse_arguments()
 
 # Validate input files
 validate_files(args.file)
