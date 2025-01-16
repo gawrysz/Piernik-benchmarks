@@ -19,11 +19,29 @@ fig_lab_pos = (0.5, 0.1)  # (0.5, 0.8) for top placement
 
 # Extract make time and load from columns
 def extr_make_t(columns: list[str]) -> tuple[float, float]:
+    """
+    Extracts make time and load from the given columns.
+
+    Args:
+        columns (list[str]): List of columns from the input file.
+
+    Returns:
+        tuple[float, float]: A tuple containing the make time and load.
+    """
     return float(columns[len(columns) - 4].replace(',', '.')), float(columns[len(columns) - 1].replace(',', '.').replace('%', ''))
 
 
 # Read timings from a benchmark file
 def read_timings(file: str) -> dict:
+    """
+    Reads timings from a benchmark file and processes the data.
+
+    Args:
+        file (str): Path to the benchmark file.
+
+    Returns:
+        dict: A dictionary containing the processed data.
+    """
     data = {}
     data["filename"] = file
     with open(file, "r") as f:
@@ -111,6 +129,12 @@ def read_timings(file: str) -> dict:
 
 # Plot the benchmark results
 def mkrplot(rdata: dict) -> None:
+    """
+    Plots the benchmark results using matplotlib.
+
+    Args:
+        rdata (dict): Dictionary containing the reduced data.
+    """
     plt.figure(figsize=(24, 18))
 
     big = -1
@@ -265,6 +289,15 @@ def mkrplot(rdata: dict) -> None:
 
 # Create a single sample from the data
 def singlesample(data: list[dict]) -> dict:
+    """
+    Creates a single sample from the given data.
+
+    Args:
+        data (list[dict]): List of dictionaries containing the data.
+
+    Returns:
+        dict: A dictionary containing the single sample.
+    """
     rd = {}
     for d in data:
         d["dname"] = d["filename"]
@@ -296,6 +329,15 @@ def singlesample(data: list[dict]) -> dict:
 
 # Reduce the data by averaging results from the same directory
 def reduce(data: dict) -> dict:
+    """
+    Reduces the data by averaging results from the same directory.
+
+    Args:
+        data (dict): Dictionary containing the data.
+
+    Returns:
+        dict: A dictionary containing the reduced data.
+    """
     rd = {}
     for d in data:
         name = os.path.dirname(d)
