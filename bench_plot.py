@@ -341,40 +341,46 @@ def reduce(data: dict) -> dict:
     rd = {}
     for d in data:
         name = os.path.dirname(d)
-        if (len(name) < 1):
+        if len(name) < 1:
             name = d
-        if (name not in rd):
+        if name not in rd:
             rd[name] = deepcopy(data[d])
-        else:
-            if (data[d]["big"] != rd[name]["big"]):
-                print("Mixing different problem sizes (" + d + ", " + name + ")")
-                exit(-2)
-            for i in ("make_real", "make_load"):
-                for v in range(len(rd[name]["avg"][i])):
-                    if (rd[name]["avg"][i][v] * data[d]["avg"][i][v] == 0.):
-                        rd[name]["avg"][i][v] = 0.
-                    else:
-                        rd[name]["avg"][i][v] = (rd[name]["weight"] * rd[name]["avg"][i][v] + data[d]["weight"] * data[d]["avg"][i][v]) / (rd[name]["weight"] + data[d]["weight"])
-                    if (rd[name]["min"][i][v] == 0):
-                        rd[name]["min"][i][v] = data[d]["min"][i][v]
-                    elif (data[d]["min"][i][v] != 0):
-                        rd[name]["min"][i][v] = min(rd[name]["min"][i][v], data[d]["min"][i][v])
-                rd[name]["max"][i] = np.maximum(rd[name]["max"][i], data[d]["max"][i])
-            i = "timings"
-            for p in list(rd[name]["avg"][i].keys()):
-                if (p not in data[d]["avg"][i]):
-                    for a in amm:
-                        del (rd[name][a][i][p])
+            continue
+
+        if data[d]["big"] != rd[name]["big"]:
+            print("Mixing different problem sizes (" + d + ", " + name + ")")
+            exit(-2)
+
+        for i in ("make_real", "make_load"):
+            for v in range(len(rd[name]["avg"][i])):
+                if rd[name]["avg"][i][v] * data[d]["avg"][i][v] == 0.:
+                    rd[name]["avg"][i][v] = 0.
                 else:
-                    for v in range(len(rd[name]["avg"][i][p])):
-                        if (rd[name]["avg"][i][p][v] is None or data[d]["avg"][i][p][v] is None):
-                            for a in amm:
-                                rd[name][a][i][p][v] = None
-                        else:
-                            rd[name]["avg"][i][p][v] = (rd[name]["weight"] * rd[name]["avg"][i][p][v] + data[d]["weight"] * data[d]["avg"][i][p][v]) / (rd[name]["weight"] + data[d]["weight"])
-                            rd[name]["min"][i][p][v] = min(rd[name]["min"][i][p][v], data[d]["min"][i][p][v])
-                            rd[name]["max"][i][p][v] = max(rd[name]["max"][i][p][v], data[d]["max"][i][p][v])
-            rd[name]["weight"] += 1
+                    rd[name]["avg"][i][v] = (rd[name]["weight"] * rd[name]["avg"][i][v] + data[d]["weight"] * data[d]["avg"][i][v]) / (rd[name]["weight"] + data[d]["weight"])
+                if rd[name]["min"][i][v] == 0:
+                    rd[name]["min"][i][v] = data[d]["min"][i][v]
+                elif data[d]["min"][i][v] != 0:
+                    rd[name]["min"][i][v] = min(rd[name]["min"][i][v], data[d]["min"][i][v])
+            rd[name]["max"][i] = np.maximum(rd[name]["max"][i], data[d]["max"][i])
+
+        i = "timings"
+        for p in list(rd[name]["avg"][i].keys()):
+            if p not in data[d]["avg"][i]:
+                for a in amm:
+                    del rd[name][a][i][p]
+                continue
+
+            for v in range(len(rd[name]["avg"][i][p])):
+                if rd[name]["avg"][i][p][v] is None or data[d]["avg"][i][p][v] is None:
+                    for a in amm:
+                        rd[name][a][i][p][v] = None
+                else:
+                    rd[name]["avg"][i][p][v] = (rd[name]["weight"] * rd[name]["avg"][i][p][v] + data[d]["weight"] * data[d]["avg"][i][p][v]) / (rd[name]["weight"] + data[d]["weight"])
+                    rd[name]["min"][i][p][v] = min(rd[name]["min"][i][p][v], data[d]["min"][i][p][v])
+                    rd[name]["max"][i][p][v] = max(rd[name]["max"][i][p][v], data[d]["max"][i][p][v])
+
+        rd[name]["weight"] += 1
+
     return rd
 
 
