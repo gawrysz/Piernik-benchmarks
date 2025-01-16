@@ -139,9 +139,9 @@ def mkrplot(rdata: dict) -> None:
 
     big = -1
     for d in rdata:
-        if (big < 0):
+        if big < 0:
             big = rdata[d]["big"]
-        elif (big != rdata[d]["big"]):
+        elif big != rdata[d]["big"]:
             print("Mixed benchmark sizes")
             big = 0
 
@@ -166,7 +166,7 @@ def mkrplot(rdata: dict) -> None:
     plt.subplot(4, 3, sub)
     for d in rdata:
         l, = plt.plot(rdata[d]["avg"]["make_real"])
-        if ("min" in rdata[d]):
+        if "min" in rdata[d]:
             plt.fill_between(list(range(len(rdata[d]["avg"]["make_real"]))), rdata[d]["min"]["make_real"], rdata[d]["max"]["make_real"], alpha=alph, color=l.get_color())
         lines.append(l)
         ld[d] = l
@@ -183,7 +183,7 @@ def mkrplot(rdata: dict) -> None:
     plt.subplot(4, 3, sub)
     for d in rdata:
         plt.plot(rdata[d]["avg"]["make_load"])
-        if ("min" in rdata[d]):
+        if "min" in rdata[d]:
             plt.fill_between(list(range(len(rdata[d]["avg"]["make_load"]))), rdata[d]["min"]["make_load"], rdata[d]["max"]["make_load"], alpha=alph, color=ld[d].get_color())
     plt.ylabel("CPU load [%]")
     plt.xticks(list(range(len(rdata[d]["avg"]["make_load"]))), m_labels)
@@ -209,32 +209,32 @@ def mkrplot(rdata: dict) -> None:
             ymax = []
             for x in n:
                 y.append(rdata[d]["avg"]["timings"][x][test])
-                if ("min" in rdata[d]):
+                if "min" in rdata[d]:
                     ymin.append(rdata[d]["min"]["timings"][x][test])
                     ymax.append(rdata[d]["max"]["timings"][x][test])
-            if (test in (sedov_strong, maclaurin_strong, crtest_strong)):
+            if test in (sedov_strong, maclaurin_strong, crtest_strong):
                 for i in range(len(y)):
-                    if (y[i]):
+                    if y[i]:
                         y[i] *= n[i]
-                        if ("min" in rdata[d]):
+                        if "min" in rdata[d]:
                             ymin[i] *= n[i]
                             ymax[i] *= n[i]
             ywhere = np.empty_like(y, dtype=bool)
-            if ("min" in rdata[d]):
+            if "min" in rdata[d]:
                 for i in range(len(y)):
                     ywhere[i] = ymin[i] and ymax[i]
-                    if (not ywhere[i]):
+                    if not ywhere[i]:
                         ymin[i] = 0.
                         ymax[i] = 0.
-            if (len(n) > 1):
+            if len(n) > 1:
                 plt.plot(n, y)
                 for x in y:
                     if x is not None:
                         has_data = True
             else:
                 plt.plot(n, y, marker='o')
-            if ("min" in rdata[d]):
-                linew = 1 if (len(n) > 1) else 10
+            if "min" in rdata[d]:
+                linew = 1 if len(n) > 1 else 10
                 plt.fill_between(n, ymin, ymax, alpha=alph, color=ld[d].get_color(), where=ywhere, linewidth=linew)
             try:
                 ym.append(max(filter(lambda v: v is not None, y)))
@@ -242,14 +242,14 @@ def mkrplot(rdata: dict) -> None:
                 pass
         ymax = plt.ylim()[1]
         try:
-            if (ymax > 1.5 * max(ym)):
+            if ymax > 1.5 * max(ym):
                 ymax = 1.2 * max(ym)
         except ValueError:
             pass
 
         xla = "N independent threads" if test in (sedov_flood, maclaurin_flood, crtest_flood) else "N_threads (MPI-1)"
         plt.xlabel(xla, verticalalignment='center')
-        if (test in (sedov_strong, maclaurin_strong, crtest_strong)):
+        if test in (sedov_strong, maclaurin_strong, crtest_strong):
             plt.ylabel("time * N_threads [s]")
         else:
             plt.ylabel("time [s]")
@@ -260,13 +260,13 @@ def mkrplot(rdata: dict) -> None:
             plt.ylim([0., ymax])
         plt.xlim(1 - exp, ntm + exp)
 
-        if (ntm >= 10):
+        if ntm >= 10:
             xf, xi = m.modf(m.log10(ntm))
             xf = pow(10, xf)
-            if (xf >= 5.):
+            if xf >= 5.:
                 xf = 1
                 xi += 1
-            elif (xf >= 2.):
+            elif xf >= 2.:
                 xf = 5
             else:
                 xf = 2
