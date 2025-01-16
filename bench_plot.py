@@ -141,12 +141,13 @@ def read_timings(file: str) -> dict:
 
 
 # Plot the benchmark results
-def mkrplot(rdata: dict) -> None:
+def mkrplot(rdata: dict, output_file: str = None) -> None:
     """
     Plots the benchmark results using matplotlib.
 
     Args:
         rdata (dict): Dictionary containing the reduced data.
+        output_file (str, optional): Path to save the plot. Defaults to None.
     """
     plt.figure(figsize=(24, 18))
 
@@ -297,7 +298,11 @@ def mkrplot(rdata: dict) -> None:
     plt.figlegend((lines), names, loc="lower center", ncol=2, frameon=False)
     plt.annotate("Piernik benchmarks", xy=(0.5, 0.97), xycoords="figure fraction", horizontalalignment='center', size=20)
 
-    plt.show()
+    if output_file:
+        plt.savefig(output_file)
+        logging.info(f"Plot saved to {output_file}")
+    else:
+        plt.show()
 
 
 # Create a single sample from the data
@@ -417,6 +422,7 @@ If there are more files in the same directory, an average is computed and also m
 parser.add_argument('file', nargs='+', metavar='benchmark_file', help='file with results obtained by piernik_bench')
 parser.add_argument('-s', '--separate', action='store_true', help='do not group the graphs according to their directories, plot them separately')
 parser.add_argument('-l', '--log', action='store_true', help='use logarithmic scale for the measured execution time')
+parser.add_argument('-o', '--output', metavar='output_file', help='file to save the plot')
 args = parser.parse_args()
 
 data = []
@@ -427,4 +433,4 @@ rdata = singlesample(data)
 if not args.separate:
     rdata = reduce(rdata)
 
-mkrplot(rdata)
+mkrplot(rdata, args.output)
