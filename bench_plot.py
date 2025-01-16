@@ -66,6 +66,7 @@ def determine_benchmark_type(line: str) -> int:
         return crtest_flood
     return -1
 
+
 def determine_data_column(b_type: int) -> int:
     """
     Determines the data column based on the benchmark type.
@@ -83,6 +84,7 @@ def determine_data_column(b_type: int) -> int:
     elif b_type in (maclaurin_weak, maclaurin_strong, maclaurin_flood):
         return 5
     return -1
+
 
 def update_make_times(line: str, columns: List[str], make_real: List[float], make_load: List[float]) -> bool:
     """
@@ -113,6 +115,7 @@ def update_make_times(line: str, columns: List[str], make_real: List[float], mak
         return False
     return True
 
+
 def process_timing_data(columns: List[str], data: Dict[str, float], timings: Dict[int, List[List[float]]], b_type: int, d_col: int) -> None:
     """
     Processes timing data from the columns and updates the timings dictionary.
@@ -135,6 +138,7 @@ def process_timing_data(columns: List[str], data: Dict[str, float], timings: Dic
     except ValueError:
         if not re.match("#", columns[0]):
             logging.warning(f"ValueError encountered while processing columns: {columns}")
+
 
 def process_line(line: str, columns: List[str], data: Dict[str, float], make_real: List[float], make_load: List[float], timings: Dict[int, List[List[float]]], b_type: int, d_col: int) -> Tuple[int, int]:
     """
@@ -168,6 +172,7 @@ def process_line(line: str, columns: List[str], data: Dict[str, float], make_rea
         if d_col != -1 and len(columns) > 0 and new_b_type == -1:
             process_timing_data(columns, data, timings, b_type, d_col)
     return b_type, d_col
+
 
 # Read timings from a benchmark file
 def read_timings(file: str) -> Dict[str, float]:
@@ -205,7 +210,6 @@ def read_timings(file: str) -> Dict[str, float]:
     except IOError:
         logging.error(f"Error reading file: {file}")
         exit(1)
-    
     return data
 
 
@@ -429,6 +433,7 @@ def average_values(weight1: float, value1: float, weight2: float, value2: float)
         return 0.
     return (weight1 * value1 + weight2 * value2) / (weight1 + weight2)
 
+
 # Reduce the data by averaging results from the same directory
 def reduce(data: Dict[str, float]) -> Dict[str, float]:
     """
@@ -502,6 +507,7 @@ def validate_files(files: List[str]) -> None:
             logging.error(f"File not readable: {file}")
             raise IOError(f"File not readable: {file}")
 
+
 def parse_arguments() -> argparse.Namespace:
     """
     Parses command-line arguments.
@@ -519,6 +525,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument('-l', '--log', action='store_true', help='use logarithmic scale for the measured execution time')
     parser.add_argument('-o', '--output', metavar='output_file', help='file to save the plot')
     return parser.parse_args()
+
 
 def main() -> None:
     """
@@ -543,6 +550,7 @@ def main() -> None:
     except Exception as e:
         logging.error(f"An error occurred: {e}")
         exit(1)
+
 
 if __name__ == "__main__":
     main()
