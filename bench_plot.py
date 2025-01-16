@@ -8,6 +8,7 @@ import math as m
 import numpy as np
 import os.path
 import logging
+from typing import List, Dict, Tuple
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -22,21 +23,21 @@ fig_lab_pos = (0.5, 0.1)  # (0.5, 0.8) for top placement
 
 
 # Extract make time and load from columns
-def extr_make_t(columns: list[str]) -> tuple[float, float]:
+def extr_make_t(columns: List[str]) -> Tuple[float, float]:
     """
     Extracts make time and load from the given columns.
 
     Args:
-        columns (list[str]): List of columns from the input file.
+        columns (List[str]): List of columns from the input file.
 
     Returns:
-        tuple[float, float]: A tuple containing the make time and load.
+        Tuple[float, float]: A tuple containing the make time and load.
     """
     return float(columns[len(columns) - 4].replace(',', '.')), float(columns[len(columns) - 1].replace(',', '.').replace('%', ''))
 
 
 # Read timings from a benchmark file
-def read_timings(file: str) -> dict:
+def read_timings(file: str) -> Dict:
     """
     Reads timings from a benchmark file and processes the data.
 
@@ -44,7 +45,7 @@ def read_timings(file: str) -> dict:
         file (str): Path to the benchmark file.
 
     Returns:
-        dict: A dictionary containing the processed data.
+        Dict: A dictionary containing the processed data.
     """
     logging.info(f"Reading timings from file: {file}")
     data = {}
@@ -141,12 +142,12 @@ def read_timings(file: str) -> dict:
 
 
 # Plot the benchmark results
-def mkrplot(rdata: dict, output_file: str = None) -> None:
+def mkrplot(rdata: Dict, output_file: str = None) -> None:
     """
     Plots the benchmark results using matplotlib.
 
     Args:
-        rdata (dict): Dictionary containing the reduced data.
+        rdata (Dict): Dictionary containing the reduced data.
         output_file (str, optional): Path to save the plot. Defaults to None.
     """
     plt.figure(figsize=(24, 18))
@@ -306,15 +307,15 @@ def mkrplot(rdata: dict, output_file: str = None) -> None:
 
 
 # Create a single sample from the data
-def singlesample(data: list[dict]) -> dict:
+def singlesample(data: List[Dict]) -> Dict:
     """
     Creates a single sample from the given data.
 
     Args:
-        data (list[dict]): List of dictionaries containing the data.
+        data (List[Dict]): List of dictionaries containing the data.
 
     Returns:
-        dict: A dictionary containing the single sample.
+        Dict: A dictionary containing the single sample.
     """
     rd = {}
     for d in data:
@@ -360,15 +361,15 @@ def average_values(weight1: float, value1: float, weight2: float, value2: float)
     return (weight1 * value1 + weight2 * value2) / (weight1 + weight2)
 
 # Reduce the data by averaging results from the same directory
-def reduce(data: dict) -> dict:
+def reduce(data: Dict) -> Dict:
     """
     Reduces the data by averaging results from the same directory.
 
     Args:
-        data (dict): Dictionary containing the data.
+        data (Dict): Dictionary containing the data.
 
     Returns:
-        dict: A dictionary containing the reduced data.
+        Dict: A dictionary containing the reduced data.
     """
     rd = {}
     for d in data:
@@ -413,12 +414,12 @@ def reduce(data: dict) -> dict:
     return rd
 
 
-def validate_files(files: list[str]) -> None:
+def validate_files(files: List[str]) -> None:
     """
     Validates the input files to ensure they exist and are readable.
 
     Args:
-        files (list[str]): List of file paths to validate.
+        files (List[str]): List of file paths to validate.
 
     Raises:
         FileNotFoundError: If any of the files do not exist.
