@@ -36,6 +36,103 @@ def extr_make_t(columns: List[str]) -> Tuple[float, float]:
     return float(columns[len(columns) - 4].replace(',', '.')), float(columns[len(columns) - 1].replace(',', '.').replace('%', ''))
 
 
+def determine_benchmark_type(line: str) -> int:
+    """
+    Determines the benchmark type based on the line content.
+
+    Args:
+        line (str): Line from the input file.
+
+    Returns:
+        int: Benchmark type.
+    """
+    if re.match("(.*)sedov, weak", line):
+        return sedov_weak
+    elif re.match("(.*)sedov, strong", line):
+        return sedov_strong
+    elif re.match("(.*)sedov, flood", line):
+        return sedov_flood
+    elif re.match("(.*)maclaurin, weak", line):
+        return maclaurin_weak
+    elif re.match("(.*)maclaurin, strong", line):
+        return maclaurin_strong
+    elif re.match("(.*)maclaurin, flood", line):
+        return maclaurin_flood
+    elif re.match("(.*)crtest, weak", line):
+        return crtest_weak
+    elif re.match("(.*)crtest, strong", line):
+        return crtest_strong
+    elif re.match("(.*)crtest, flood", line):
+        return crtest_flood
+    return -1
+
+def determine_data_column(b_type: int) -> int:
+    """
+    Determines the data column based on the benchmark type.
+
+    Args:
+        b_type (int): Benchmark type.
+
+    Returns:
+        int: Data column index.
+    """
+    if b_type in (crtest_weak, crtest_strong, crtest_flood):
+        return 3
+    elif b_type in (sedov_weak, sedov_strong, sedov_flood):
+        return 6
+    elif b_type in (maclaurin_weak, maclaurin_strong, maclaurin_flood):
+        return 5
+    return -1
+
+def process_line(line: str, columns: List[str], data: Dict, make_real: List[float], make_load: List[float], timings: Dict, b_type: int, d_col: int) -> Tuple[int, int]:
+    """
+    Processes a line from the input file and updates the data structures.
+
+    Args:
+        line (str): Line from the input file.
+        columns (List[str]): List of columns from the input file.
+        data (Dict): Dictionary to store the processed data.
+        make_real (List[float]): List to store make real times.
+        make_load (List[float]): List to store make load values.
+        timings (Dict): Dictionary to store timing data.
+        b_type (int): Benchmark type.
+        d_col (int): Data column index.
+
+    Returns:
+        Tuple[int, int]: Updated benchmark type and data column index.
+    """
+    if re.match("# test domains are scaled by factor of", line):
+        data["big"] = float(columns[-1])
+    elif re.match("Preparing objects", line):
+        make_real[make_prep], make_load[make_prep] = extr_make_t(columns)
+    elif re.match("Single-thread make object", line):
+        make_real[make_11], make_load[make_11] = extr_make_t(columns)
+    elif re.match("Multi-thread make object", line):
+        make_real[make_1n], make_load[make_1n] = extr_make_t(columns)
+    elif re.match("Multi-thread make two objects", line):
+        make_real[make_2n], make_load[make_2n] = extr_make_t(columns)
+    elif re.match("Multi-thread make four objects", line):
+        make_real[make_4n], make_load[make_4n] = extr_make_t(columns)
+    elif re.match("Multi-thread make eight objects", line):
+        make_real[make_8n], make_load[make_8n] = extr_make_t(columns)
+    else:
+        new_b_type = determine_benchmark_type(line)
+        if new_b_type != -1:
+            b_type = new_b_type
+            d_col = determine_data_column(b_type)
+        if d_col != -1 and len(columns) > 0:
+            try:
+                nthr = int(columns[0])
+                if nthr > 2**20:  # crude protection against eating too much memory due to bad data lines
+                    logging.warning(f"Ignoring bogus thread number: {columns}")
+                elif nthr > 0:
+                    if nthr not in timings:
+                        timings[nthr] = [[] for _ in range(crtest_flood + 1)]
+                    timings[nthr][b_type].append(float(columns[d_col]) / (data["big"]**3) if len(columns) >= d_col + 1 else None)
+            except ValueError:
+                pass
+    return b_type, d_col
+
 # Read timings from a benchmark file
 def read_timings(file: str) -> Dict:
     """
@@ -58,75 +155,10 @@ def read_timings(file: str) -> Dict:
             data["big"] = 1.  # problem size factor
 
             b_type = -1
+            d_col = -1
             for line in f:
                 columns = line.split()
-                if re.match("# test domains are scaled by factor of", line):
-                    data["big"] = float(columns[-1])
-                    continue
-                if re.match("##", line):
-                    continue
-                if re.match("Preparing objects", line):
-                    make_real[make_prep], make_load[make_prep] = extr_make_t(columns)
-                    continue
-                if re.match("Single-thread make object", line):
-                    make_real[make_11], make_load[make_11] = extr_make_t(columns)
-                    continue
-                if re.match("Multi-thread make object", line):
-                    make_real[make_1n], make_load[make_1n] = extr_make_t(columns)
-                    continue
-                if re.match("Multi-thread make two objects", line):
-                    make_real[make_2n], make_load[make_2n] = extr_make_t(columns)
-                    continue
-                if re.match("Multi-thread make four objects", line):
-                    make_real[make_4n], make_load[make_4n] = extr_make_t(columns)
-                    continue
-                if re.match("Multi-thread make eight objects", line):
-                    make_real[make_8n], make_load[make_8n] = extr_make_t(columns)
-                    continue
-
-                # Determine benchmark type
-                if re.match("(.*)sedov, weak", line):
-                    b_type = sedov_weak
-                elif re.match("(.*)sedov, strong", line):
-                    b_type = sedov_strong
-                elif re.match("(.*)sedov, flood", line):
-                    b_type = sedov_flood
-                elif re.match("(.*)maclaurin, weak", line):
-                    b_type = maclaurin_weak
-                elif re.match("(.*)maclaurin, strong", line):
-                    b_type = maclaurin_strong
-                elif re.match("(.*)maclaurin, flood", line):
-                    b_type = maclaurin_flood
-                elif re.match("(.*)crtest, weak", line):
-                    b_type = crtest_weak
-                elif re.match("(.*)crtest, strong", line):
-                    b_type = crtest_strong
-                elif re.match("(.*)crtest, flood", line):
-                    b_type = crtest_flood
-
-                # Determine data column based on benchmark type
-                if b_type in (crtest_weak, crtest_strong, crtest_flood):
-                    d_col = 3
-                elif b_type in (sedov_weak, sedov_strong, sedov_flood):
-                    d_col = 6
-                elif b_type in (maclaurin_weak, maclaurin_strong, maclaurin_flood):
-                    d_col = 5
-                elif len(line.strip()) > 1:
-                    logging.error(f"Unknown test: {line.strip()}, {b_type}")
-                    exit(1)
-
-                # Process timing data
-                if len(columns) > 0:
-                    try:
-                        nthr = int(columns[0])
-                        if nthr > 2**20:  # crude protection against eating too much memory due to bad data lines
-                            logging.warning(f"Ignoring bogus thread number: {columns}")
-                        elif nthr > 0:
-                            if nthr not in timings:
-                                timings[nthr] = [[] for x in range(crtest_flood + 1)]
-                            timings[nthr][b_type].append(float(columns[d_col]) / (data["big"]**3) if len(columns) >= d_col + 1 else None)
-                    except ValueError:
-                        continue
+                b_type, d_col = process_line(line, columns, data, make_real, make_load, timings, b_type, d_col)
 
             data["make_real"] = make_real
             data["make_load"] = make_load
