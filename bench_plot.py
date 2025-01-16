@@ -413,6 +413,25 @@ def reduce(data: dict) -> dict:
     return rd
 
 
+def validate_files(files: list[str]) -> None:
+    """
+    Validates the input files to ensure they exist and are readable.
+
+    Args:
+        files (list[str]): List of file paths to validate.
+
+    Raises:
+        FileNotFoundError: If any of the files do not exist.
+        IOError: If any of the files are not readable.
+    """
+    for file in files:
+        if not os.path.isfile(file):
+            logging.error(f"File not found: {file}")
+            raise FileNotFoundError(f"File not found: {file}")
+        if not os.access(file, os.R_OK):
+            logging.error(f"File not readable: {file}")
+            raise IOError(f"File not readable: {file}")
+
 # Argument parser setup
 parser = argparse.ArgumentParser(description='''
 Show performance graphs from benchmark files.
@@ -424,6 +443,9 @@ parser.add_argument('-s', '--separate', action='store_true', help='do not group 
 parser.add_argument('-l', '--log', action='store_true', help='use logarithmic scale for the measured execution time')
 parser.add_argument('-o', '--output', metavar='output_file', help='file to save the plot')
 args = parser.parse_args()
+
+# Validate input files
+validate_files(args.file)
 
 data = []
 for f in args.file:
