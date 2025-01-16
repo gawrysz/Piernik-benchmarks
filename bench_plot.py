@@ -44,86 +44,94 @@ def read_timings(file: str) -> dict:
     """
     data = {}
     data["filename"] = file
-    with open(file, "r") as f:
-        make_real = [0 for x in range(make_8n + 1)]
-        make_load = [0 for x in range(make_8n + 1)]
-        timings = {}
-        data["big"] = 1.  # problem size factor
+    try:
+        with open(file, "r") as f:
+            make_real = [0 for x in range(make_8n + 1)]
+            make_load = [0 for x in range(make_8n + 1)]
+            timings = {}
+            data["big"] = 1.  # problem size factor
 
-        b_type = -1
-        for line in f:
-            columns = line.split()
-            if re.match("# test domains are scaled by factor of", line):
-                data["big"] = float(columns[-1])
-                continue
-            if re.match("##", line):
-                continue
-            if re.match("Preparing objects", line):
-                make_real[make_prep], make_load[make_prep] = extr_make_t(columns)
-                continue
-            if re.match("Single-thread make object", line):
-                make_real[make_11], make_load[make_11] = extr_make_t(columns)
-                continue
-            if re.match("Multi-thread make object", line):
-                make_real[make_1n], make_load[make_1n] = extr_make_t(columns)
-                continue
-            if re.match("Multi-thread make two objects", line):
-                make_real[make_2n], make_load[make_2n] = extr_make_t(columns)
-                continue
-            if re.match("Multi-thread make four objects", line):
-                make_real[make_4n], make_load[make_4n] = extr_make_t(columns)
-                continue
-            if re.match("Multi-thread make eight objects", line):
-                make_real[make_8n], make_load[make_8n] = extr_make_t(columns)
-                continue
-
-            # Determine benchmark type
-            if re.match("(.*)sedov, weak", line):
-                b_type = sedov_weak
-            elif re.match("(.*)sedov, strong", line):
-                b_type = sedov_strong
-            elif re.match("(.*)sedov, flood", line):
-                b_type = sedov_flood
-            elif re.match("(.*)maclaurin, weak", line):
-                b_type = maclaurin_weak
-            elif re.match("(.*)maclaurin, strong", line):
-                b_type = maclaurin_strong
-            elif re.match("(.*)maclaurin, flood", line):
-                b_type = maclaurin_flood
-            elif re.match("(.*)crtest, weak", line):
-                b_type = crtest_weak
-            elif re.match("(.*)crtest, strong", line):
-                b_type = crtest_strong
-            elif re.match("(.*)crtest, flood", line):
-                b_type = crtest_flood
-
-            # Determine data column based on benchmark type
-            if b_type in (crtest_weak, crtest_strong, crtest_flood):
-                d_col = 3
-            elif b_type in (sedov_weak, sedov_strong, sedov_flood):
-                d_col = 6
-            elif b_type in (maclaurin_weak, maclaurin_strong, maclaurin_flood):
-                d_col = 5
-            elif len(line.strip()) > 1:
-                print("Unknown test: ", line.strip(), b_type)
-                exit(1)
-
-            # Process timing data
-            if len(columns) > 0:
-                try:
-                    nthr = int(columns[0])
-                    if nthr > 2**20:  # crude protection against eating too much memory due to bad data lines
-                        print("Ignoring bogus thread number: ", columns)
-                    elif nthr > 0:
-                        if nthr not in timings:
-                            timings[nthr] = [[] for x in range(crtest_flood + 1)]
-                        timings[nthr][b_type].append(float(columns[d_col]) / (data["big"]**3) if len(columns) >= d_col + 1 else None)
-                except ValueError:
+            b_type = -1
+            for line in f:
+                columns = line.split()
+                if re.match("# test domains are scaled by factor of", line):
+                    data["big"] = float(columns[-1])
+                    continue
+                if re.match("##", line):
+                    continue
+                if re.match("Preparing objects", line):
+                    make_real[make_prep], make_load[make_prep] = extr_make_t(columns)
+                    continue
+                if re.match("Single-thread make object", line):
+                    make_real[make_11], make_load[make_11] = extr_make_t(columns)
+                    continue
+                if re.match("Multi-thread make object", line):
+                    make_real[make_1n], make_load[make_1n] = extr_make_t(columns)
+                    continue
+                if re.match("Multi-thread make two objects", line):
+                    make_real[make_2n], make_load[make_2n] = extr_make_t(columns)
+                    continue
+                if re.match("Multi-thread make four objects", line):
+                    make_real[make_4n], make_load[make_4n] = extr_make_t(columns)
+                    continue
+                if re.match("Multi-thread make eight objects", line):
+                    make_real[make_8n], make_load[make_8n] = extr_make_t(columns)
                     continue
 
-    data["make_real"] = make_real
-    data["make_load"] = make_load
-    data["timings"] = timings
+                # Determine benchmark type
+                if re.match("(.*)sedov, weak", line):
+                    b_type = sedov_weak
+                elif re.match("(.*)sedov, strong", line):
+                    b_type = sedov_strong
+                elif re.match("(.*)sedov, flood", line):
+                    b_type = sedov_flood
+                elif re.match("(.*)maclaurin, weak", line):
+                    b_type = maclaurin_weak
+                elif re.match("(.*)maclaurin, strong", line):
+                    b_type = maclaurin_strong
+                elif re.match("(.*)maclaurin, flood", line):
+                    b_type = maclaurin_flood
+                elif re.match("(.*)crtest, weak", line):
+                    b_type = crtest_weak
+                elif re.match("(.*)crtest, strong", line):
+                    b_type = crtest_strong
+                elif re.match("(.*)crtest, flood", line):
+                    b_type = crtest_flood
+
+                # Determine data column based on benchmark type
+                if b_type in (crtest_weak, crtest_strong, crtest_flood):
+                    d_col = 3
+                elif b_type in (sedov_weak, sedov_strong, sedov_flood):
+                    d_col = 6
+                elif b_type in (maclaurin_weak, maclaurin_strong, maclaurin_flood):
+                    d_col = 5
+                elif len(line.strip()) > 1:
+                    print("Unknown test: ", line.strip(), b_type)
+                    exit(1)
+
+                # Process timing data
+                if len(columns) > 0:
+                    try:
+                        nthr = int(columns[0])
+                        if nthr > 2**20:  # crude protection against eating too much memory due to bad data lines
+                            print("Ignoring bogus thread number: ", columns)
+                        elif nthr > 0:
+                            if nthr not in timings:
+                                timings[nthr] = [[] for x in range(crtest_flood + 1)]
+                            timings[nthr][b_type].append(float(columns[d_col]) / (data["big"]**3) if len(columns) >= d_col + 1 else None)
+                    except ValueError:
+                        continue
+
+            data["make_real"] = make_real
+            data["make_load"] = make_load
+            data["timings"] = timings
+    except FileNotFoundError:
+        print(f"File not found: {file}")
+        exit(1)
+    except IOError:
+        print(f"Error reading file: {file}")
+        exit(1)
+    
     return data
 
 
