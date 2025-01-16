@@ -84,6 +84,58 @@ def determine_data_column(b_type: int) -> int:
         return 5
     return -1
 
+def update_make_times(line: str, columns: List[str], make_real: List[float], make_load: List[float]) -> bool:
+    """
+    Updates make times and load based on the line content.
+
+    Args:
+        line (str): Line from the input file.
+        columns (List[str]): List of columns from the input file.
+        make_real (List[float]): List to store make real times.
+        make_load (List[float]): List to store make load values.
+
+    Returns:
+        bool: True if make times were updated, False otherwise.
+    """
+    if re.match("Preparing objects", line):
+        make_real[make_prep], make_load[make_prep] = extr_make_t(columns)
+    elif re.match("Single-thread make object", line):
+        make_real[make_11], make_load[make_11] = extr_make_t(columns)
+    elif re.match("Multi-thread make object", line):
+        make_real[make_1n], make_load[make_1n] = extr_make_t(columns)
+    elif re.match("Multi-thread make two objects", line):
+        make_real[make_2n], make_load[make_2n] = extr_make_t(columns)
+    elif re.match("Multi-thread make four objects", line):
+        make_real[make_4n], make_load[make_4n] = extr_make_t(columns)
+    elif re.match("Multi-thread make eight objects", line):
+        make_real[make_8n], make_load[make_8n] = extr_make_t(columns)
+    else:
+        return False
+    return True
+
+def process_timing_data(columns: List[str], data: Dict, timings: Dict, b_type: int, d_col: int) -> None:
+    """
+    Processes timing data from the columns and updates the timings dictionary.
+
+    Args:
+        columns (List[str]): List of columns from the input file.
+        data (Dict): Dictionary to store the processed data.
+        timings (Dict): Dictionary to store timing data.
+        b_type (int): Benchmark type.
+        d_col (int): Data column index.
+    """
+    try:
+        nthr = int(columns[0])
+        if nthr > 2**20:  # crude protection against eating too much memory due to bad data lines
+            logging.warning(f"Ignoring bogus thread number: {columns}")
+        elif nthr > 0:
+            if nthr not in timings:
+                timings[nthr] = [[] for _ in range(crtest_flood + 1)]
+            timings[nthr][b_type].append(float(columns[d_col]) / (data["big"]**3) if len(columns) >= d_col + 1 else None)
+    except ValueError:
+        if not re.match("#", columns[0]):
+            logging.warning(f"ValueError encountered while processing columns: {columns}")
+
 def process_line(line: str, columns: List[str], data: Dict, make_real: List[float], make_load: List[float], timings: Dict, b_type: int, d_col: int) -> Tuple[int, int]:
     """
     Processes a line from the input file and updates the data structures.
@@ -101,39 +153,20 @@ def process_line(line: str, columns: List[str], data: Dict, make_real: List[floa
     Returns:
         Tuple[int, int]: Updated benchmark type and data column index.
     """
+    logging.debug(f"Processing line: {line.strip()}")
     if re.match("# test domains are scaled by factor of", line):
         data["big"] = float(columns[-1])
         logging.debug(f"Set problem size factor to {data['big']}")
-    elif re.match("Preparing objects", line):
-        make_real[make_prep], make_load[make_prep] = extr_make_t(columns)
-    elif re.match("Single-thread make object", line):
-        make_real[make_11], make_load[make_11] = extr_make_t(columns)
-    elif re.match("Multi-thread make object", line):
-        make_real[make_1n], make_load[make_1n] = extr_make_t(columns)
-    elif re.match("Multi-thread make two objects", line):
-        make_real[make_2n], make_load[make_2n] = extr_make_t(columns)
-    elif re.match("Multi-thread make four objects", line):
-        make_real[make_4n], make_load[make_4n] = extr_make_t(columns)
-    elif re.match("Multi-thread make eight objects", line):
-        make_real[make_8n], make_load[make_8n] = extr_make_t(columns)
+    elif update_make_times(line, columns, make_real, make_load):
+        logging.debug(f"Updated make times for line: {line.strip()}")
     else:
         new_b_type = determine_benchmark_type(line)
         if new_b_type != -1:
             b_type = new_b_type
             d_col = determine_data_column(b_type)
             logging.debug(f"Detected benchmark type: {b_type}, data column: {d_col}")
-        if d_col != -1 and len(columns) > 0:
-            try:
-                nthr = int(columns[0])
-                if nthr > 2**20:  # crude protection against eating too much memory due to bad data lines
-                    logging.warning(f"Ignoring bogus thread number: {columns}")
-                elif nthr > 0:
-                    if nthr not in timings:
-                        timings[nthr] = [[] for _ in range(crtest_flood + 1)]
-                    timings[nthr][b_type].append(float(columns[d_col]) / (data["big"]**3) if len(columns) >= d_col + 1 else None)
-            except ValueError:
-                if not re.match("#", line) and new_b_type == -1:
-                    logging.warning(f"ValueError encountered while processing line: {line.strip()}")
+        if d_col != -1 and len(columns) > 0 and new_b_type == -1:
+            process_timing_data(columns, data, timings, b_type, d_col)
     return b_type, d_col
 
 # Read timings from a benchmark file
