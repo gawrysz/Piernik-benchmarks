@@ -142,12 +142,13 @@ def read_timings(file: str) -> Dict:
 
 
 # Plot the benchmark results
-def mkrplot(rdata: Dict, output_file: str = None) -> None:
+def mkrplot(rdata: Dict, args: argparse.Namespace, output_file: str = None) -> None:
     """
     Plots the benchmark results using matplotlib.
 
     Args:
         rdata (Dict): Dictionary containing the reduced data.
+        args (argparse.Namespace): Parsed command-line arguments.
         output_file (str, optional): Path to save the plot. Defaults to None.
     """
     plt.figure(figsize=(24, 18))
@@ -455,21 +456,25 @@ def main() -> None:
     """
     Main function to execute the script.
     """
-    # Argument parser setup
-    args = parse_arguments()
+    try:
+        # Argument parser setup
+        args = parse_arguments()
 
-    # Validate input files
-    validate_files(args.file)
+        # Validate input files
+        validate_files(args.file)
 
-    data = []
-    for f in args.file:
-        data.append(read_timings(f))
+        data = []
+        for f in args.file:
+            data.append(read_timings(f))
 
-    rdata = singlesample(data)
-    if not args.separate:
-        rdata = reduce(rdata)
+        rdata = singlesample(data)
+        if not args.separate:
+            rdata = reduce(rdata)
 
-    mkrplot(rdata, args.output)
+        mkrplot(rdata, args, args.output)
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
+        exit(1)
 
 if __name__ == "__main__":
     main()
