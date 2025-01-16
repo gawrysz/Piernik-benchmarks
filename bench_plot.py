@@ -21,6 +21,17 @@ amm = ["avg", "min", "max"]
 
 fig_lab_pos = (0.5, 0.1)  # (0.5, 0.8) for top placement
 
+# Define regex patterns as constants
+SEDOV_WEAK_PATTERN = re.compile(r"(.*)sedov, weak")
+SEDOV_STRONG_PATTERN = re.compile(r"(.*)sedov, strong")
+SEDOV_FLOOD_PATTERN = re.compile(r"(.*)sedov, flood")
+MACLAURIN_WEAK_PATTERN = re.compile(r"(.*)maclaurin, weak")
+MACLAURIN_STRONG_PATTERN = re.compile(r"(.*)maclaurin, strong")
+MACLAURIN_FLOOD_PATTERN = re.compile(r"(.*)maclaurin, flood")
+CRTEST_WEAK_PATTERN = re.compile(r"(.*)crtest, weak")
+CRTEST_STRONG_PATTERN = re.compile(r"(.*)crtest, strong")
+CRTEST_FLOOD_PATTERN = re.compile(r"(.*)crtest, flood")
+
 
 # Extract make time and load from columns
 def extr_make_t(columns: List[str]) -> Tuple[float, float]:
@@ -46,24 +57,20 @@ def determine_benchmark_type(line: str) -> int:
     Returns:
         int: Benchmark type.
     """
-    if re.match("(.*)sedov, weak", line):
-        return sedov_weak
-    elif re.match("(.*)sedov, strong", line):
-        return sedov_strong
-    elif re.match("(.*)sedov, flood", line):
-        return sedov_flood
-    elif re.match("(.*)maclaurin, weak", line):
-        return maclaurin_weak
-    elif re.match("(.*)maclaurin, strong", line):
-        return maclaurin_strong
-    elif re.match("(.*)maclaurin, flood", line):
-        return maclaurin_flood
-    elif re.match("(.*)crtest, weak", line):
-        return crtest_weak
-    elif re.match("(.*)crtest, strong", line):
-        return crtest_strong
-    elif re.match("(.*)crtest, flood", line):
-        return crtest_flood
+    patterns = {
+        SEDOV_WEAK_PATTERN: sedov_weak,
+        SEDOV_STRONG_PATTERN: sedov_strong,
+        SEDOV_FLOOD_PATTERN: sedov_flood,
+        MACLAURIN_WEAK_PATTERN: maclaurin_weak,
+        MACLAURIN_STRONG_PATTERN: maclaurin_strong,
+        MACLAURIN_FLOOD_PATTERN: maclaurin_flood,
+        CRTEST_WEAK_PATTERN: crtest_weak,
+        CRTEST_STRONG_PATTERN: crtest_strong,
+        CRTEST_FLOOD_PATTERN: crtest_flood,
+    }
+    for pattern, b_type in patterns.items():
+        if pattern.match(line):
+            return b_type
     return -1
 
 
@@ -99,21 +106,19 @@ def update_make_times(line: str, columns: List[str], make_real: List[float], mak
     Returns:
         bool: True if make times were updated, False otherwise.
     """
-    if re.match("Preparing objects", line):
-        make_real[make_prep], make_load[make_prep] = extr_make_t(columns)
-    elif re.match("Single-thread make object", line):
-        make_real[make_11], make_load[make_11] = extr_make_t(columns)
-    elif re.match("Multi-thread make object", line):
-        make_real[make_1n], make_load[make_1n] = extr_make_t(columns)
-    elif re.match("Multi-thread make two objects", line):
-        make_real[make_2n], make_load[make_2n] = extr_make_t(columns)
-    elif re.match("Multi-thread make four objects", line):
-        make_real[make_4n], make_load[make_4n] = extr_make_t(columns)
-    elif re.match("Multi-thread make eight objects", line):
-        make_real[make_8n], make_load[make_8n] = extr_make_t(columns)
-    else:
-        return False
-    return True
+    patterns = {
+        "Preparing objects": make_prep,
+        "Single-thread make object": make_11,
+        "Multi-thread make object": make_1n,
+        "Multi-thread make two objects": make_2n,
+        "Multi-thread make four objects": make_4n,
+        "Multi-thread make eight objects": make_8n,
+    }
+    for pattern, index in patterns.items():
+        if re.match(pattern, line):
+            make_real[index], make_load[index] = extr_make_t(columns)
+            return True
+    return False
 
 
 def process_timing_data(columns: List[str], data: Dict[str, float], timings: Dict[int, List[List[float]]], b_type: int, d_col: int) -> None:
@@ -547,8 +552,13 @@ def main() -> None:
             rdata = reduce(rdata)
 
         mkrplot(rdata, args, args.output)
+    except FileNotFoundError as e:  # message was already printed by validate_files
+        exit(1)
+    except IOError as e:
+        logging.error(f"IO error: {e}")
+        exit(1)
     except Exception as e:
-        logging.error(f"An error occurred: {e}")
+        logging.error(f"An unexpected error occurred: {e}")
         exit(1)
 
 
