@@ -332,6 +332,23 @@ def singlesample(data: list[dict]) -> dict:
     return rd
 
 
+def average_values(weight1: float, value1: float, weight2: float, value2: float) -> float:
+    """
+    Averages two values with their respective weights.
+
+    Args:
+        weight1 (float): Weight of the first value.
+        value1 (float): The first value.
+        weight2 (float): Weight of the second value.
+        value2 (float): The second value.
+
+    Returns:
+        float: The weighted average of the two values.
+    """
+    if value1 * value2 == 0.:
+        return 0.
+    return (weight1 * value1 + weight2 * value2) / (weight1 + weight2)
+
 # Reduce the data by averaging results from the same directory
 def reduce(data: dict) -> dict:
     """
@@ -358,10 +375,7 @@ def reduce(data: dict) -> dict:
 
         for i in ("make_real", "make_load"):
             for v in range(len(rd[name]["avg"][i])):
-                if rd[name]["avg"][i][v] * data[d]["avg"][i][v] == 0.:
-                    rd[name]["avg"][i][v] = 0.
-                else:
-                    rd[name]["avg"][i][v] = (rd[name]["weight"] * rd[name]["avg"][i][v] + data[d]["weight"] * data[d]["avg"][i][v]) / (rd[name]["weight"] + data[d]["weight"])
+                rd[name]["avg"][i][v] = average_values(rd[name]["weight"], rd[name]["avg"][i][v], data[d]["weight"], data[d]["avg"][i][v])
                 if rd[name]["min"][i][v] == 0:
                     rd[name]["min"][i][v] = data[d]["min"][i][v]
                 elif data[d]["min"][i][v] != 0:
@@ -380,7 +394,7 @@ def reduce(data: dict) -> dict:
                     for a in amm:
                         rd[name][a][i][p][v] = None
                 else:
-                    rd[name]["avg"][i][p][v] = (rd[name]["weight"] * rd[name]["avg"][i][p][v] + data[d]["weight"] * data[d]["avg"][i][p][v]) / (rd[name]["weight"] + data[d]["weight"])
+                    rd[name]["avg"][i][p][v] = average_values(rd[name]["weight"], rd[name]["avg"][i][p][v], data[d]["weight"], data[d]["avg"][i][p][v])
                     rd[name]["min"][i][p][v] = min(rd[name]["min"][i][p][v], data[d]["min"][i][p][v])
                     rd[name]["max"][i][p][v] = max(rd[name]["max"][i][p][v], data[d]["max"][i][p][v])
 
