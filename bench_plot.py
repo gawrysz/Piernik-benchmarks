@@ -18,12 +18,12 @@ fig_lab_pos = (0.5, 0.1)  # (0.5, 0.8) for top placement
 
 
 # Extract make time and load from columns
-def extr_make_t(columns):
+def extr_make_t(columns: list[str]) -> tuple[float, float]:
     return float(columns[len(columns) - 4].replace(',', '.')), float(columns[len(columns) - 1].replace(',', '.').replace('%', ''))
 
 
 # Read timings from a benchmark file
-def read_timings(file):
+def read_timings(file: str) -> dict:
     data = {}
     data["filename"] = file
     with open(file, "r") as f:
@@ -103,7 +103,7 @@ def read_timings(file):
 
 
 # Plot the benchmark results
-def mkrplot(rdata):
+def mkrplot(rdata: dict) -> None:
     plt.figure(figsize=(24, 18))
 
     big = -1
@@ -257,7 +257,7 @@ def mkrplot(rdata):
 
 
 # Create a single sample from the data
-def singlesample(data):
+def singlesample(data: list[dict]) -> dict:
     rd = {}
     for d in data:
         d["dname"] = d["filename"]
@@ -288,7 +288,7 @@ def singlesample(data):
 
 
 # Reduce the data by averaging results from the same directory
-def reduce(data):
+def reduce(data: dict) -> dict:
     rd = {}
     for d in data:
         name = os.path.dirname(d)
