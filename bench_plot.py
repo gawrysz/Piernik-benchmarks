@@ -2,6 +2,11 @@
 
 import argparse
 from copy import deepcopy
+import re  # overkill, I know
+import matplotlib.pyplot as plt
+import math as m
+import numpy as np
+import os.path
 
 # Define constants for benchmark types and make stages
 sedov_weak, sedov_strong, sedov_flood, maclaurin_weak, maclaurin_strong, maclaurin_flood, crtest_weak, crtest_strong, crtest_flood = list(range(9))
@@ -19,8 +24,6 @@ def extr_make_t(columns):
 
 # Read timings from a benchmark file
 def read_timings(file):
-    import re  # overkill, I know
-
     data = {}
     data["filename"] = file
     with open(file, "r") as f:
@@ -101,10 +104,6 @@ def read_timings(file):
 
 # Plot the benchmark results
 def mkrplot(rdata):
-    import matplotlib.pyplot as plt
-    import math as m
-    import numpy as np
-
     plt.figure(figsize=(24, 18))
 
     big = -1
@@ -259,8 +258,6 @@ def mkrplot(rdata):
 
 # Create a single sample from the data
 def singlesample(data):
-    import os.path
-    import numpy as np
     rd = {}
     for d in data:
         d["dname"] = d["filename"]
@@ -292,9 +289,6 @@ def singlesample(data):
 
 # Reduce the data by averaging results from the same directory
 def reduce(data):
-    import os.path
-    import numpy as np
-
     rd = {}
     for d in data:
         name = os.path.dirname(d)
