@@ -186,13 +186,13 @@ def read_timings(file: str) -> Dict[str, float]:
         Dict[str, float]: A dictionary containing the processed data.
     """
     logging.info(f"Reading timings from file: {file}")
-    data = {}
+    data: Dict[str, float] = {}
     data["filename"] = file
     try:
         with open(file, "r") as f:
             make_real = [0 for x in range(make_8n + 1)]
             make_load = [0 for x in range(make_8n + 1)]
-            timings = {}
+            timings: Dict[int, List[List[float]]] = {}
             data["big"] = 1.  # problem size factor
 
             b_type = -1
@@ -390,7 +390,7 @@ def singlesample(data: List[Dict[str, float]]) -> Dict[str, float]:
     Returns:
         Dict[str, float]: A dictionary containing the single sample.
     """
-    rd = {}
+    rd: Dict[str, float] = {}
     for d in data:
         d["dname"] = d["filename"]
         rd[d["dname"]] = {}
@@ -445,7 +445,7 @@ def reduce(data: Dict[str, float]) -> Dict[str, float]:
     Returns:
         Dict[str, float]: A dictionary containing the reduced data.
     """
-    rd = {}
+    rd: Dict[str, float] = {}
     for d in data:
         name = os.path.dirname(d)
         if len(name) < 1:
