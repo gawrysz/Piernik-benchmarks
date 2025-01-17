@@ -39,6 +39,7 @@ SEDOV_DATA_COLUMN = 6
 MACLAURIN_DATA_COLUMN = 5
 INVALID_COLUMN = -1
 
+
 # Extract make time and load from columns
 def extr_make_t(columns: List[str]) -> Tuple[float, float]:
     """
@@ -128,6 +129,7 @@ def update_make_times(line: str, columns: List[str], make_real: List[float], mak
 
 
 MAX_THREADS = 2**20
+
 
 def process_timing_data(columns: List[str], data: Dict[str, float], timings: Dict[int, List[List[float]]], b_type: int, d_col: int) -> None:
     """
@@ -349,6 +351,23 @@ def plot_subplot(sub: int, rdata: Dict[str, float], test: int, t_labels: List[st
     plt.xticks(x_ticks)
 
 
+# Define test labels as a constant
+def get_test_labels(big: float) -> List[str]:
+    sizes = [64, 64, 64, 64, 128, 64, 32, 32, 32]
+    descriptions = [
+        "sedov, weak scaling\nN_thr * {} x {} x {}, cartesian decomposition",
+        "sedov, strong scaling\n{} x {} x {}, cartesian decomposition",
+        "sedov, flood scaling, {} x {} x {}",
+        "maclaurin, weak scaling\nN_thr * {} x {} x {}, block decomposition 32 x 32 x 32",
+        "maclaurin, strong scaling\n{} x {} x {}, block decomposition 32 x 32 x 32",
+        "maclaurin, flood scaling\n{} x {} x {}, block decomposition 32 x 32 x 32",
+        "crtest, weak scaling\nN_thr * {} x {} x {}, noncartesian decomposition",
+        "crtest, strong scaling\n{} x {} x {}, noncartesian decomposition",
+        "crtest, flood scaling, {} x {} x {}"
+    ]
+    return [desc.format(int(size * big), int(size * big), int(size * big)) for desc, size in zip(descriptions, sizes)]
+
+
 def mkrplot(rdata: Dict[str, float], args: argparse.Namespace, output_file: str = None) -> None:
     """
     Plots the benchmark results using matplotlib.
@@ -369,17 +388,7 @@ def mkrplot(rdata: Dict[str, float], args: argparse.Namespace, output_file: str 
             big = 0
 
     m_labels = ["setup", "serial\nmake", "parallel\nmake", "parallel\nmake 2 obj.", "parallel\nmake 4 obj.", "parallel\nmake 8 obj."]
-    t_labels = [
-        "sedov, weak scaling\nN_thr * {} x {} x {}, cartesian decomposition".format(int(64 * big), int(64 * big), int(64 * big)),
-        "sedov, strong scaling\n{} x {} x {}, cartesian decomposition".format(int(64 * big), int(64 * big), int(64 * big)),
-        "sedov, flood scaling, {} x {} x {}".format(int(64 * big), int(64 * big), int(64 * big)),
-        "maclaurin, weak scaling\nN_thr * {} x {} x {}, block decomposition 32 x 32 x 32".format(int(64 * big), int(64 * big), int(64 * big)),
-        "maclaurin, strong scaling\n{} x {} x {}, block decomposition 32 x 32 x 32".format(int(128 * big), int(128 * big), int(128 * big)),
-        "maclaurin, flood scaling\n{} x {} x {}, block decomposition 32 x 32 x 32".format(int(64 * big), int(64 * big), int(64 * big)),
-        "crtest, weak scaling\nN_thr * {} x {} x {}, noncartesian decomposition".format(int(32 * big), int(32 * big), int(32 * big)),
-        "crtest, strong scaling\n{} x {} x {}, noncartesian decomposition".format(int(32 * big), int(32 * big), int(32 * big)),
-        "crtest, flood scaling, {} x {} x {}".format(int(32 * big), int(32 * big), int(32 * big))
-    ]
+    t_labels = get_test_labels(big)
 
     alph = 0.2
     exp = 0.25
