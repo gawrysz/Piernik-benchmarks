@@ -197,6 +197,17 @@ def process_line(line: str, columns: List[str], data: Dict[str, float], make_rea
 
 
 # Read timings from a benchmark file
+def initialize_make_times() -> Tuple[List[float], List[float]]:
+    """
+    Initializes the make times and load lists.
+
+    Returns:
+        Tuple[List[float], List[float]]: Initialized make times and load lists.
+    """
+    make_real = [0 for _ in range(make_8n + 1)]
+    make_load = [0 for _ in range(make_8n + 1)]
+    return make_real, make_load
+
 def read_timings(file: str) -> Dict[str, float]:
     """
     Reads timings from a benchmark file and processes the data.
@@ -212,8 +223,7 @@ def read_timings(file: str) -> Dict[str, float]:
     data["filename"] = file
     try:
         with open(file, "r") as f:
-            make_real = [0 for x in range(make_8n + 1)]
-            make_load = [0 for x in range(make_8n + 1)]
+            make_real, make_load = initialize_make_times()
             timings: Dict[int, List[List[float]]] = {}
             data["big"] = 1.  # problem size factor
 
