@@ -145,6 +145,24 @@ def process_timing_data(columns: List[str], data: Dict[str, float], timings: Dic
             logging.warning(f"ValueError encountered while processing columns: {columns}")
 
 
+def set_problem_size_factor(line: str, columns: List[str], data: Dict[str, float]) -> bool:
+    """
+    Sets the problem size factor based on the line content.
+
+    Args:
+        line (str): Line from the input file.
+        columns (List[str]): List of columns from the input file.
+        data (Dict[str, float]): Dictionary to store the processed data.
+
+    Returns:
+        bool: True if the problem size factor was set, False otherwise.
+    """
+    if re.match("# test domains are scaled by factor of", line):
+        data["big"] = float(columns[-1])
+        logging.debug(f"Set problem size factor to {data['big']}")
+        return True
+    return False
+
 def process_line(line: str, columns: List[str], data: Dict[str, float], make_real: List[float], make_load: List[float], timings: Dict[int, List[List[float]]], b_type: int, d_col: int) -> Tuple[int, int]:
     """
     Processes a line from the input file and updates the data structures.
@@ -163,9 +181,8 @@ def process_line(line: str, columns: List[str], data: Dict[str, float], make_rea
         Tuple[int, int]: Updated benchmark type and data column index.
     """
     logging.debug(f"Processing line: {line.strip()}")
-    if re.match("# test domains are scaled by factor of", line):
-        data["big"] = float(columns[-1])
-        logging.debug(f"Set problem size factor to {data['big']}")
+    if set_problem_size_factor(line, columns, data):
+        return b_type, d_col
     elif update_make_times(line, columns, make_real, make_load):
         logging.debug(f"Updated make times for line: {line.strip()}")
     else:
