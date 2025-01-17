@@ -32,6 +32,12 @@ CRTEST_WEAK_PATTERN = re.compile(r"(.*)crtest, weak")
 CRTEST_STRONG_PATTERN = re.compile(r"(.*)crtest, strong")
 CRTEST_FLOOD_PATTERN = re.compile(r"(.*)crtest, flood")
 
+MAKE_TIME_INDEX = -4
+MAKE_LOAD_INDEX = -1
+CRTEST_DATA_COLUMN = 3
+SEDOV_DATA_COLUMN = 6
+MACLAURIN_DATA_COLUMN = 5
+INVALID_COLUMN = -1
 
 # Extract make time and load from columns
 def extr_make_t(columns: List[str]) -> Tuple[float, float]:
@@ -44,7 +50,7 @@ def extr_make_t(columns: List[str]) -> Tuple[float, float]:
     Returns:
         Tuple[float, float]: A tuple containing the make time and load.
     """
-    return float(columns[len(columns) - 4].replace(',', '.')), float(columns[len(columns) - 1].replace(',', '.').replace('%', ''))
+    return float(columns[MAKE_TIME_INDEX].replace(',', '.')), float(columns[MAKE_LOAD_INDEX].replace(',', '.').replace('%', ''))
 
 
 def determine_benchmark_type(line: str) -> int:
@@ -85,12 +91,12 @@ def determine_data_column(benchmark_type: int) -> int:
         int: Data column index.
     """
     if benchmark_type in (crtest_weak, crtest_strong, crtest_flood):
-        return 3
+        return CRTEST_DATA_COLUMN
     elif benchmark_type in (sedov_weak, sedov_strong, sedov_flood):
-        return 6
+        return SEDOV_DATA_COLUMN
     elif benchmark_type in (maclaurin_weak, maclaurin_strong, maclaurin_flood):
-        return 5
-    return -1
+        return MACLAURIN_DATA_COLUMN
+    return INVALID_COLUMN
 
 
 def update_make_times(line: str, columns: List[str], make_real: List[float], make_load: List[float]) -> bool:
