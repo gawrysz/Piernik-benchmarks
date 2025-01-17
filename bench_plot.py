@@ -236,6 +236,98 @@ def read_timings(file: str) -> Dict[str, float]:
 
 
 # Plot the benchmark results
+def plot_subplot(sub: int, rdata: Dict[str, float], test: int, t_labels: List[str], ld: Dict[str, plt.Line2D], args: argparse.Namespace, fig_lab_pos: Tuple[float, float], exp: float, ntm: int) -> None:
+    """
+    Plots an individual subplot.
+
+    Args:
+        sub (int): Subplot index.
+        rdata (Dict[str, float]): Dictionary containing the reduced data.
+        test (int): Benchmark test type.
+        t_labels (List[str]): List of test labels.
+        ld (Dict[str, plt.Line2D]): Dictionary of line objects.
+        args (argparse.Namespace): Parsed command-line arguments.
+        fig_lab_pos (Tuple[float, float]): Figure label position.
+        exp (float): Expansion factor for x-axis limits.
+        ntm (int): Maximum number of threads.
+    """
+    plt.subplot(4, 3, sub)
+    ym = []
+    has_data = False
+    for d in rdata:
+        n = sorted(rdata[d]["avg"]["timings"].keys())
+        y = []
+        ymin = []
+        ymax = []
+        for x in n:
+            y.append(rdata[d]["avg"]["timings"][x][test])
+            if "min" in rdata[d]:
+                ymin.append(rdata[d]["min"]["timings"][x][test])
+                ymax.append(rdata[d]["max"]["timings"][x][test])
+        if test in (sedov_strong, maclaurin_strong, crtest_strong):
+            for i in range(len(y)):
+                if y[i]:
+                    y[i] *= n[i]
+                    if "min" in rdata[d]:
+                        ymin[i] *= n[i]
+                        ymax[i] *= n[i]
+        ywhere = np.empty_like(y, dtype=bool)
+        if "min" in rdata[d]:
+            for i in range(len(y)):
+                ywhere[i] = ymin[i] and ymax[i]
+                if not ywhere[i]:
+                    ymin[i] = 0.
+                    ymax[i] = 0.
+        if len(n) > 1:
+            plt.plot(n, y)
+            for x in y:
+                if x is not None:
+                    has_data = True
+        else:
+            plt.plot(n, y, marker='o')
+        if "min" in rdata[d]:
+            linew = 1 if len(n) > 1 else 10
+            plt.fill_between(n, ymin, ymax, alpha=0.2, color=ld[d].get_color(), where=ywhere, linewidth=linew)
+        try:
+            ym.append(max(filter(lambda v: v is not None, y)))
+        except ValueError:
+            pass
+    ymax = plt.ylim()[1]
+    try:
+        if ymax > 1.5 * max(ym):
+            ymax = 1.2 * max(ym)
+    except ValueError:
+        pass
+
+    xla = "N independent threads" if test in (sedov_flood, maclaurin_flood, crtest_flood) else "N_threads (MPI-1)"
+    plt.xlabel(xla, verticalalignment='center')
+    if test in (sedov_strong, maclaurin_strong, crtest_strong):
+        plt.ylabel("time * N_threads [s]")
+    else:
+        plt.ylabel("time [s]")
+    plt.annotate(t_labels[test], xy=fig_lab_pos, xycoords="axes fraction", horizontalalignment='center')
+    if args.log and has_data:  # don't crash on empty plots
+        plt.yscale("log")
+    else:
+        plt.ylim([0., ymax])
+    plt.xlim(1 - exp, ntm + exp)
+
+    if ntm >= 10:
+        xf, xi = m.modf(m.log10(ntm))
+        xf = pow(10, xf)
+        if xf >= 5.:
+            xf = 1
+            xi += 1
+        elif xf >= 2.:
+            xf = 5
+        else:
+            xf = 2
+        xtstep = int(xf * m.pow(10, xi - 1))
+        x_ticks = list(range(0, ntm + xtstep, xtstep))
+    else:
+        x_ticks = list(range(1, ntm + 1))
+    plt.xticks(x_ticks)
+
 def mkrplot(rdata: Dict[str, float], args: argparse.Namespace, output_file: str = None) -> None:
     """
     Plots the benchmark results using matplotlib.
@@ -309,82 +401,7 @@ def mkrplot(rdata: Dict[str, float], args: argparse.Namespace, output_file: str 
     sub = 3
     for test in (sedov_weak, sedov_strong, sedov_flood, maclaurin_weak, maclaurin_strong, maclaurin_flood, crtest_weak, crtest_strong, crtest_flood):
         sub += 1
-        plt.subplot(4, 3, sub)
-        ym = []
-        has_data = False
-        for d in rdata:
-            n = sorted(rdata[d]["avg"]["timings"].keys())
-            y = []
-            ymin = []
-            ymax = []
-            for x in n:
-                y.append(rdata[d]["avg"]["timings"][x][test])
-                if "min" in rdata[d]:
-                    ymin.append(rdata[d]["min"]["timings"][x][test])
-                    ymax.append(rdata[d]["max"]["timings"][x][test])
-            if test in (sedov_strong, maclaurin_strong, crtest_strong):
-                for i in range(len(y)):
-                    if y[i]:
-                        y[i] *= n[i]
-                        if "min" in rdata[d]:
-                            ymin[i] *= n[i]
-                            ymax[i] *= n[i]
-            ywhere = np.empty_like(y, dtype=bool)
-            if "min" in rdata[d]:
-                for i in range(len(y)):
-                    ywhere[i] = ymin[i] and ymax[i]
-                    if not ywhere[i]:
-                        ymin[i] = 0.
-                        ymax[i] = 0.
-            if len(n) > 1:
-                plt.plot(n, y)
-                for x in y:
-                    if x is not None:
-                        has_data = True
-            else:
-                plt.plot(n, y, marker='o')
-            if "min" in rdata[d]:
-                linew = 1 if len(n) > 1 else 10
-                plt.fill_between(n, ymin, ymax, alpha=alph, color=ld[d].get_color(), where=ywhere, linewidth=linew)
-            try:
-                ym.append(max(filter(lambda v: v is not None, y)))
-            except ValueError:
-                pass
-        ymax = plt.ylim()[1]
-        try:
-            if ymax > 1.5 * max(ym):
-                ymax = 1.2 * max(ym)
-        except ValueError:
-            pass
-
-        xla = "N independent threads" if test in (sedov_flood, maclaurin_flood, crtest_flood) else "N_threads (MPI-1)"
-        plt.xlabel(xla, verticalalignment='center')
-        if test in (sedov_strong, maclaurin_strong, crtest_strong):
-            plt.ylabel("time * N_threads [s]")
-        else:
-            plt.ylabel("time [s]")
-        plt.annotate(t_labels[test], xy=fig_lab_pos, xycoords="axes fraction", horizontalalignment='center')
-        if args.log and has_data:  # don't crash on empty plots
-            plt.yscale("log")
-        else:
-            plt.ylim([0., ymax])
-        plt.xlim(1 - exp, ntm + exp)
-
-        if ntm >= 10:
-            xf, xi = m.modf(m.log10(ntm))
-            xf = pow(10, xf)
-            if xf >= 5.:
-                xf = 1
-                xi += 1
-            elif xf >= 2.:
-                xf = 5
-            else:
-                xf = 2
-            xtstep = int(xf * m.pow(10, xi - 1))
-            x_ticks = list(range(0, ntm + xtstep, xtstep))
-        else:
-            x_ticks = list(range(1, ntm + 1))
-        plt.xticks(x_ticks)
+        plot_subplot(sub, rdata, test, t_labels, ld, args, fig_lab_pos, exp, ntm)
 
     names = []
     for d in rdata:
