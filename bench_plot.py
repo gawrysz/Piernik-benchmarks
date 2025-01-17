@@ -68,27 +68,27 @@ def determine_benchmark_type(line: str) -> int:
         CRTEST_STRONG_PATTERN: crtest_strong,
         CRTEST_FLOOD_PATTERN: crtest_flood,
     }
-    for pattern, b_type in patterns.items():
+    for pattern, benchmark_type in patterns.items():
         if pattern.match(line):
-            return b_type
+            return benchmark_type
     return -1
 
 
-def determine_data_column(b_type: int) -> int:
+def determine_data_column(benchmark_type: int) -> int:
     """
     Determines the data column based on the benchmark type.
 
     Args:
-        b_type (int): Benchmark type.
+        benchmark_type (int): Benchmark type.
 
     Returns:
         int: Data column index.
     """
-    if b_type in (crtest_weak, crtest_strong, crtest_flood):
+    if benchmark_type in (crtest_weak, crtest_strong, crtest_flood):
         return 3
-    elif b_type in (sedov_weak, sedov_strong, sedov_flood):
+    elif benchmark_type in (sedov_weak, sedov_strong, sedov_flood):
         return 6
-    elif b_type in (maclaurin_weak, maclaurin_strong, maclaurin_flood):
+    elif benchmark_type in (maclaurin_weak, maclaurin_strong, maclaurin_flood):
         return 5
     return -1
 
@@ -121,6 +121,8 @@ def update_make_times(line: str, columns: List[str], make_real: List[float], mak
     return False
 
 
+MAX_THREADS = 2**20
+
 def process_timing_data(columns: List[str], data: Dict[str, float], timings: Dict[int, List[List[float]]], b_type: int, d_col: int) -> None:
     """
     Processes timing data from the columns and updates the timings dictionary.
@@ -134,7 +136,7 @@ def process_timing_data(columns: List[str], data: Dict[str, float], timings: Dic
     """
     try:
         nthr = int(columns[0])
-        if nthr > 2**20:  # crude protection against eating too much memory due to bad data lines
+        if nthr > MAX_THREADS:  # crude protection against eating too much memory due to bad data lines
             logging.warning(f"Ignoring bogus thread number: {columns}")
         elif nthr > 0:
             if nthr not in timings:
@@ -164,7 +166,7 @@ def set_problem_size_factor(line: str, columns: List[str], data: Dict[str, float
     return False
 
 
-def process_line(line: str, columns: List[str], data: Dict[str, float], make_real: List[float], make_load: List[float], timings: Dict[int, List[List[float]]], b_type: int, d_col: int) -> Tuple[int, int]:
+def process_line(line: str, columns: List[str], data: Dict[str, float], make_real: List[float], make_load: List[float], timings: Dict[int, List[List[float]]], benchmark_type: int, data_column: int) -> Tuple[int, int]:
     """
     Processes a line from the input file and updates the data structures.
 
@@ -175,26 +177,26 @@ def process_line(line: str, columns: List[str], data: Dict[str, float], make_rea
         make_real (List[float]): List to store make real times.
         make_load (List[float]): List to store make load values.
         timings (Dict[int, List[List[float]]]): Dictionary to store timing data.
-        b_type (int): Benchmark type.
-        d_col (int): Data column index.
+        benchmark_type (int): Benchmark type.
+        data_column (int): Data column index.
 
     Returns:
         Tuple[int, int]: Updated benchmark type and data column index.
     """
     logging.debug(f"Processing line: {line.strip()}")
     if set_problem_size_factor(line, columns, data):
-        return b_type, d_col
+        return benchmark_type, data_column
     elif update_make_times(line, columns, make_real, make_load):
         logging.debug(f"Updated make times for line: {line.strip()}")
     else:
-        new_b_type = determine_benchmark_type(line)
-        if new_b_type != -1:
-            b_type = new_b_type
-            d_col = determine_data_column(b_type)
-            logging.debug(f"Detected benchmark type: {b_type}, data column: {d_col}")
-        if d_col != -1 and len(columns) > 0 and new_b_type == -1:
-            process_timing_data(columns, data, timings, b_type, d_col)
-    return b_type, d_col
+        new_benchmark_type = determine_benchmark_type(line)
+        if new_benchmark_type != -1:
+            benchmark_type = new_benchmark_type
+            data_column = determine_data_column(benchmark_type)
+            logging.debug(f"Detected benchmark type: {benchmark_type}, data column: {data_column}")
+        if data_column != -1 and len(columns) > 0 and new_benchmark_type == -1:
+            process_timing_data(columns, data, timings, benchmark_type, data_column)
+    return benchmark_type, data_column
 
 
 # Read timings from a benchmark file
@@ -205,8 +207,8 @@ def initialize_make_times() -> Tuple[List[float], List[float]]:
     Returns:
         Tuple[List[float], List[float]]: Initialized make times and load lists.
     """
-    make_real = [0 for _ in range(make_8n + 1)]
-    make_load = [0 for _ in range(make_8n + 1)]
+    make_real: List[float] = [0 for _ in range(make_8n + 1)]
+    make_load: List[float] = [0 for _ in range(make_8n + 1)]
     return make_real, make_load
 
 
