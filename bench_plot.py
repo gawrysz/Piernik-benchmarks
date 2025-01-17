@@ -419,6 +419,38 @@ def mkrplot(rdata: Dict[str, float], args: argparse.Namespace, output_file: str 
 
 
 # Create a single sample from the data
+def initialize_sample(d: Dict[str, float]) -> Dict[str, float]:
+    """
+    Initializes the sample dictionary for a given data entry.
+
+    Args:
+        d (Dict[str, float]): Data entry.
+
+    Returns:
+        Dict[str, float]: Initialized sample dictionary.
+    """
+    sample = {}
+    sample["big"] = d["big"]
+    sample["weight"] = 1
+    for a in amm:
+        sample[a] = {}
+        sample[a]["timings"] = {}
+    for i in ("make_real", "make_load"):
+        for a in amm:
+            sample[a][i] = deepcopy(d[i])
+    for p in d["timings"]:
+        for a in amm:
+            sample[a]["timings"][p] = []
+        for t in d["timings"][p]:
+            if len(t) == 0 or None in t:
+                for a in amm:
+                    sample[a]["timings"][p].append(None)
+            else:
+                sample["avg"]["timings"][p].append(np.average(t))
+                sample["min"]["timings"][p].append(np.min(t))
+                sample["max"]["timings"][p].append(np.max(t))
+    return sample
+
 def singlesample(data: List[Dict[str, float]]) -> Dict[str, float]:
     """
     Creates a single sample from the given data.
@@ -432,26 +464,7 @@ def singlesample(data: List[Dict[str, float]]) -> Dict[str, float]:
     rd: Dict[str, float] = {}
     for d in data:
         d["dname"] = d["filename"]
-        rd[d["dname"]] = {}
-        rd[d["dname"]]["big"] = d["big"]
-        rd[d["dname"]]["weight"] = 1
-        for a in amm:
-            rd[d["dname"]][a] = {}
-            rd[d["dname"]][a]["timings"] = {}
-        for i in ("make_real", "make_load"):
-            for a in amm:
-                rd[d["dname"]][a][i] = deepcopy(d[i])
-        for p in d["timings"]:
-            for a in amm:
-                rd[d["dname"]][a]["timings"][p] = []
-            for t in d["timings"][p]:
-                if len(t) == 0 or None in t:
-                    for a in amm:
-                        rd[d["dname"]][a]["timings"][p].append(None)
-                else:
-                    rd[d["dname"]]["avg"]["timings"][p].append(np.average(t))
-                    rd[d["dname"]]["min"]["timings"][p].append(np.min(t))
-                    rd[d["dname"]]["max"]["timings"][p].append(np.max(t))
+        rd[d["dname"]] = initialize_sample(d)
     return rd
 
 
