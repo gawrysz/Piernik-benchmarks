@@ -163,6 +163,7 @@ def set_problem_size_factor(line: str, columns: List[str], data: Dict[str, float
         return True
     return False
 
+
 def process_line(line: str, columns: List[str], data: Dict[str, float], make_real: List[float], make_load: List[float], timings: Dict[int, List[List[float]]], b_type: int, d_col: int) -> Tuple[int, int]:
     """
     Processes a line from the input file and updates the data structures.
@@ -207,6 +208,7 @@ def initialize_make_times() -> Tuple[List[float], List[float]]:
     make_real = [0 for _ in range(make_8n + 1)]
     make_load = [0 for _ in range(make_8n + 1)]
     return make_real, make_load
+
 
 def read_timings(file: str) -> Dict[str, float]:
     """
@@ -338,6 +340,7 @@ def plot_subplot(sub: int, rdata: Dict[str, float], test: int, t_labels: List[st
         x_ticks = list(range(1, ntm + 1))
     plt.xticks(x_ticks)
 
+
 def mkrplot(rdata: Dict[str, float], args: argparse.Namespace, output_file: str = None) -> None:
     """
     Plots the benchmark results using matplotlib.
@@ -460,6 +463,7 @@ def initialize_sample(d: Dict[str, float]) -> Dict[str, float]:
                 sample["min"]["timings"][p].append(np.min(t))
                 sample["max"]["timings"][p].append(np.max(t))
     return sample
+
 
 def singlesample(data: List[Dict[str, float]]) -> Dict[str, float]:
     """
