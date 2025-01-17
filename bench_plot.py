@@ -456,6 +456,42 @@ def average_values(weight1: float, value1: float, weight2: float, value2: float)
     return (weight1 * value1 + weight2 * value2) / (weight1 + weight2)
 
 
+def update_reduced_values(rd: Dict[str, float], data: Dict[str, float], name: str, d: str) -> None:
+    """
+    Updates the reduced values for average, min, and max.
+
+    Args:
+        rd (Dict[str, float]): Dictionary containing the reduced data.
+        data (Dict[str, float]): Dictionary containing the original data.
+        name (str): Name of the directory.
+        d (str): Data key.
+    """
+    for i in ("make_real", "make_load"):
+        for v in range(len(rd[name]["avg"][i])):
+            rd[name]["avg"][i][v] = average_values(rd[name]["weight"], rd[name]["avg"][i][v], data[d]["weight"], data[d]["avg"][i][v])
+            if rd[name]["min"][i][v] == 0:
+                rd[name]["min"][i][v] = data[d]["min"][i][v]
+            elif data[d]["min"][i][v] != 0:
+                rd[name]["min"][i][v] = min(rd[name]["min"][i][v], data[d]["min"][i][v])
+        rd[name]["max"][i] = np.maximum(rd[name]["max"][i], data[d]["max"][i])
+
+    i = "timings"
+    for p in list(rd[name]["avg"][i].keys()):
+        if p not in data[d]["avg"][i]:
+            for a in amm:
+                del rd[name][a][i][p]
+            continue
+
+        for v in range(len(rd[name]["avg"][i][p])):
+            if rd[name]["avg"][i][p][v] is None or data[d]["avg"][i][p][v] is None:
+                for a in amm:
+                    rd[name][a][i][p][v] = None
+            else:
+                rd[name]["avg"][i][p][v] = average_values(rd[name]["weight"], rd[name]["avg"][i][p][v], data[d]["weight"], data[d]["avg"][i][p][v])
+                rd[name]["min"][i][p][v] = min(rd[name]["min"][i][p][v], data[d]["min"][i][p][v])
+                rd[name]["max"][i][p][v] = max(rd[name]["max"][i][p][v], data[d]["max"][i][p][v])
+
+
 # Reduce the data by averaging results from the same directory
 def reduce(data: Dict[str, float]) -> Dict[str, float]:
     """
@@ -480,31 +516,7 @@ def reduce(data: Dict[str, float]) -> Dict[str, float]:
             print("Mixing different problem sizes (" + d + ", " + name + ")")
             exit(-2)
 
-        for i in ("make_real", "make_load"):
-            for v in range(len(rd[name]["avg"][i])):
-                rd[name]["avg"][i][v] = average_values(rd[name]["weight"], rd[name]["avg"][i][v], data[d]["weight"], data[d]["avg"][i][v])
-                if rd[name]["min"][i][v] == 0:
-                    rd[name]["min"][i][v] = data[d]["min"][i][v]
-                elif data[d]["min"][i][v] != 0:
-                    rd[name]["min"][i][v] = min(rd[name]["min"][i][v], data[d]["min"][i][v])
-            rd[name]["max"][i] = np.maximum(rd[name]["max"][i], data[d]["max"][i])
-
-        i = "timings"
-        for p in list(rd[name]["avg"][i].keys()):
-            if p not in data[d]["avg"][i]:
-                for a in amm:
-                    del rd[name][a][i][p]
-                continue
-
-            for v in range(len(rd[name]["avg"][i][p])):
-                if rd[name]["avg"][i][p][v] is None or data[d]["avg"][i][p][v] is None:
-                    for a in amm:
-                        rd[name][a][i][p][v] = None
-                else:
-                    rd[name]["avg"][i][p][v] = average_values(rd[name]["weight"], rd[name]["avg"][i][p][v], data[d]["weight"], data[d]["avg"][i][p][v])
-                    rd[name]["min"][i][p][v] = min(rd[name]["min"][i][p][v], data[d]["min"][i][p][v])
-                    rd[name]["max"][i][p][v] = max(rd[name]["max"][i][p][v], data[d]["max"][i][p][v])
-
+        update_reduced_values(rd, data, name, d)
         rd[name]["weight"] += 1
 
     return rd
