@@ -349,6 +349,7 @@ def plot_subplot(sub: int, rdata: Dict[str, float], test: int, t_labels: List[st
     else:
         x_ticks = list(range(1, ntm + 1))
     plt.xticks(x_ticks)
+    plt.tick_params(axis='y', which='both', right=True)  # Add ticks on the right side
 
 
 # Define test labels as a constant
