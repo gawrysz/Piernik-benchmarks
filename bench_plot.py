@@ -14,8 +14,13 @@ from typing import List, Dict, Tuple
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Define constants for benchmark types and make stages
-sedov_weak, sedov_strong, sedov_flood, maclaurin_weak, maclaurin_strong, maclaurin_flood, crtest_weak, crtest_strong, crtest_flood, core_sedov, core_maclaurin, core_crtest = list(range(12))
-bench_types = core_crtest + 1
+sedov_weak, sedov_strong, sedov_flood, \
+    maclaurin_weak, maclaurin_strong, maclaurin_flood, \
+    crtest_weak, crtest_strong, crtest_flood, \
+    sedov_core1, sedov_core_phy, sedov_core_all, \
+    maclaurin_core1, maclaurin_core_phy, maclaurin_core_all, \
+    crtest_core1, crtest_core_phy, crtest_core_all, \
+    _bench_types = list(range(19))
 make_prep, make_11, make_1n, make_2n, make_4n, make_8n = list(range(6))
 
 amm = ["avg", "min", "max"]
@@ -32,9 +37,15 @@ MACLAURIN_FLOOD_PATTERN = re.compile(r"(.*)maclaurin, flood")
 CRTEST_WEAK_PATTERN = re.compile(r"(.*)crtest, weak")
 CRTEST_STRONG_PATTERN = re.compile(r"(.*)crtest, strong")
 CRTEST_FLOOD_PATTERN = re.compile(r"(.*)crtest, flood")
-CORE_SEDOV_PATTERN = re.compile(r"(.*)Core profiling on sedov")
-CORE_MACLAURIN_PATTERN = re.compile(r"(.*)Core profiling on maclaurin")
-CORE_CRTEST_PATTERN = re.compile(r"(.*)Core profiling on crtest")
+SEDOV_CORE1_PATTERN = re.compile(r"(.*)Core profiling on sedov, single core")
+SEDOV_CORE_PHY_PATTERN = re.compile(r"(.*)Core profiling on sedov, all physical cores")
+SEDOV_CORE_ALL_PATTERN = re.compile(r"(.*)Core profiling on sedov, all threads")
+MACLAURIN_CORE1_PATTERN = re.compile(r"(.*)Core profiling on maclaurin, single core")
+MACLAURIN_CORE_PHY_PATTERN = re.compile(r"(.*)Core profiling on maclaurin, all physical cores")
+MACLAURIN_CORE_ALL_PATTERN = re.compile(r"(.*)Core profiling on maclaurin, all threads")
+CRTEST_CORE1_PATTERN = re.compile(r"(.*)Core profiling on crtest problem, single core")
+CRTEST_CORE_PHY_PATTERN = re.compile(r"(.*)Core profiling on crtest problem, all physical cores")
+CRTEST_CORE_ALL_PATTERN = re.compile(r"(.*)Core profiling on crtest problem, all threads")
 
 # Define constants for column indices
 MAKE_TIME_INDEX = -4
@@ -79,9 +90,15 @@ def determine_benchmark_type(line: str) -> int:
         CRTEST_WEAK_PATTERN: crtest_weak,
         CRTEST_STRONG_PATTERN: crtest_strong,
         CRTEST_FLOOD_PATTERN: crtest_flood,
-        CORE_SEDOV_PATTERN: core_sedov,
-        CORE_MACLAURIN_PATTERN: core_maclaurin,
-        CORE_CRTEST_PATTERN: core_crtest,
+        SEDOV_CORE1_PATTERN: sedov_core1,
+        SEDOV_CORE_PHY_PATTERN: sedov_core_phy,
+        SEDOV_CORE_ALL_PATTERN: sedov_core_all,
+        MACLAURIN_CORE1_PATTERN: maclaurin_core1,
+        MACLAURIN_CORE_PHY_PATTERN: maclaurin_core_phy,
+        MACLAURIN_CORE_ALL_PATTERN: maclaurin_core_all,
+        CRTEST_CORE1_PATTERN: crtest_core1,
+        CRTEST_CORE_PHY_PATTERN: crtest_core_phy,
+        CRTEST_CORE_ALL_PATTERN: crtest_core_all
     }
     for pattern, benchmark_type in patterns.items():
         if pattern.match(line):
@@ -99,11 +116,11 @@ def determine_data_column(benchmark_type: int) -> int:
     Returns:
         int: Data column index.
     """
-    if benchmark_type in (crtest_weak, crtest_strong, crtest_flood, core_crtest):
+    if benchmark_type in (crtest_weak, crtest_strong, crtest_flood, crtest_core1, crtest_core_all, crtest_core_phy):
         return CRTEST_DATA_COLUMN
-    elif benchmark_type in (sedov_weak, sedov_strong, sedov_flood, core_sedov):
+    elif benchmark_type in (sedov_weak, sedov_strong, sedov_flood, sedov_core1, sedov_core_all, sedov_core_phy):
         return SEDOV_DATA_COLUMN
-    elif benchmark_type in (maclaurin_weak, maclaurin_strong, maclaurin_flood, core_maclaurin):
+    elif benchmark_type in (maclaurin_weak, maclaurin_strong, maclaurin_flood, maclaurin_core1, maclaurin_core_all, maclaurin_core_phy):
         return MACLAURIN_DATA_COLUMN
     return INVALID_COLUMN
 
@@ -156,7 +173,7 @@ def process_timing_data(columns: List[str], data: Dict[str, float], timings: Dic
             logging.warning(f"Ignoring bogus thread number: {columns}")
         elif nthr > 0:
             if nthr not in timings:
-                timings[nthr] = [[] for _ in range(bench_types)]
+                timings[nthr] = [[] for _ in range(_bench_types)]
             timings[nthr][b_type].append(float(columns[d_col]) / (data["big"]**3) if len(columns) >= d_col + 1 else None)
     except ValueError:
         if not re.match("#", columns[0]):
@@ -290,12 +307,12 @@ def plot_subplot(sub: int, rdata: Dict[str, float], test: int, t_labels: List[st
         ymin = []
         ymax = []
         for x in n:
-            if test in (core_crtest, core_sedov, core_maclaurin):
+            if test in (crtest_core1, sedov_core1, maclaurin_core1, sedov_core_phy, maclaurin_core_phy, crtest_core_phy, sedov_core_all, maclaurin_core_all, crtest_core_all):
                 if rdata[d]["avg"]["timings"][x][test]:
-                    y.append(1./rdata[d]["avg"]["timings"][x][test])
+                    y.append(1. / rdata[d]["avg"]["timings"][x][test])
                     if "min" in rdata[d]:
-                        ymin.append(1./rdata[d]["min"]["timings"][x][test])
-                        ymax.append(1./rdata[d]["max"]["timings"][x][test])
+                        ymin.append(1. / rdata[d]["min"]["timings"][x][test])
+                        ymax.append(1. / rdata[d]["max"]["timings"][x][test])
                 else:
                     y.append(0)
                     if "min" in rdata[d]:
@@ -343,14 +360,14 @@ def plot_subplot(sub: int, rdata: Dict[str, float], test: int, t_labels: List[st
 
     if test in (sedov_flood, maclaurin_flood, crtest_flood):
         xla = "N independent threads"
-    elif test in (core_crtest, core_sedov, core_maclaurin):
+    elif test in (crtest_core1, sedov_core1, maclaurin_core1, sedov_core_phy, maclaurin_core_phy, crtest_core_phy, sedov_core_all, maclaurin_core_all, crtest_core_all):
         xla = "core number"
     else:
         xla = "N_threads (MPI-1)"
     plt.xlabel(xla, verticalalignment='center')
     if test in (sedov_strong, maclaurin_strong, crtest_strong):
         plt.ylabel("time * N_threads [s]")
-    elif test in (core_crtest, core_sedov, core_maclaurin):
+    elif test in (crtest_core1, sedov_core1, maclaurin_core1, sedov_core_phy, maclaurin_core_phy, crtest_core_phy, sedov_core_all, maclaurin_core_all, crtest_core_all):
         plt.ylabel("steps per second")
     else:
         plt.ylabel("time [s]")
@@ -374,7 +391,7 @@ def plot_subplot(sub: int, rdata: Dict[str, float], test: int, t_labels: List[st
 
 # Define test labels as a constant
 def get_test_labels(big: float) -> List[str]:
-    sizes = [64, 64, 64, 64, 128, 64, 32, 32, 32, 64, 64, 32]
+    sizes = [64, 64, 64, 64, 128, 64, 32, 32, 32, 64, 64, 64, 64, 64, 64, 32, 32, 32]
     descriptions = [
         "sedov, weak scaling\nN_thr * {} x {} x {}, cartesian decomposition",
         "sedov, strong scaling\n{} x {} x {}, cartesian decomposition",
@@ -385,9 +402,9 @@ def get_test_labels(big: float) -> List[str]:
         "crtest, weak scaling\nN_thr * {} x {} x {}, noncartesian decomposition",
         "crtest, strong scaling\n{} x {} x {}, noncartesian decomposition",
         "crtest, flood scaling, {} x {} x {}",
-        "Core profiling on sedov\n{} x {} x {}",
-        "Core profiling on maclaurin\n{} x {} x {}",
-        "Core profiling on crtest\n{} x {} x {}"
+        "Core performance on sedov, {} x {} x {}", "Core performance on sedov, {} x {} x {}", "Core performance on sedov, {} x {} x {}",
+        "Core performance on maclaurin, {} x {} x {}", "Core performance on maclaurin, {} x {} x {}", "Core performance on maclaurin, {} x {} x {}",
+        "Core performance on crtest, {} x {} x {}", "Core performance on crtest, {} x {} x {}", "Core performance on crtest, {} x {} x {}"
     ]
     return [desc.format(int(size * big), int(size * big), int(size * big)) for desc, size in zip(descriptions, sizes)]
 
@@ -401,7 +418,7 @@ def mkrplot(rdata: Dict[str, float], args: argparse.Namespace, output_file: str 
         args (argparse.Namespace): Parsed command-line arguments.
         output_file (str, optional): Path to save the plot. Defaults to None.
     """
-    plt.figure(figsize=(24, 18))
+    plt.figure(figsize=(24, 12))
 
     big = -1
     for d in rdata:
@@ -452,9 +469,81 @@ def mkrplot(rdata: Dict[str, float], args: argparse.Namespace, output_file: str 
         for k in list(rdata[d]["avg"]["timings"].keys()):
             ntm = max(ntm, k)
 
+    def interpolate_missing_points(keys: List[int], values: List[float]) -> List[float]:
+        """
+        Interpolates missing values (None or 0) with the last valid value from the left.
+
+        Args:
+            keys (List[int]): List of x-axis values (core numbers)
+            values (List[float]): List of y-axis values
+
+        Returns:
+            List[float]: List of interpolated values
+        """
+        result = []
+        last_valid = 0
+        for v in values:
+            if v:  # if value is valid (not None and not 0)
+                last_valid = v
+                result.append(v)
+            else:
+                result.append(last_valid)
+        return result
+
     sub = 3
-    test = core_crtest  # alternatives: core_sedov, core_maclaurin
-    plot_subplot(sub, rdata, core_crtest, t_labels, ld, args, fig_lab_pos, exp, ntm)
+    plt.subplot(4, 3, sub)
+    # Create invisible black lines for legend
+    legend_lines = []
+    legend_lines.append(plt.plot([], [], color='black', label='Single core load')[0])
+    legend_lines.append(plt.plot([], [], color='black', linestyle='--', label='Physical cores (flood)')[0])
+    legend_lines.append(plt.plot([], [], color='black', linestyle=':', label='All threads (flood)')[0])
+
+    # Plot all three data series directly without calling plot_subplot first
+    for d in rdata:
+        sorted_keys = sorted(rdata[d]["avg"]["timings"].keys())
+        # Single core data
+        single_core_values = [1. / v if v else 0 for v in [rdata[d]["avg"]["timings"][k][crtest_core1] for k in sorted_keys]]
+        plt.plot(sorted_keys, single_core_values, color=ld[d].get_color())
+        if "min" in rdata[d]:
+            single_core_min = [1. / v if v else 0 for v in [rdata[d]["min"]["timings"][k][crtest_core1] for k in sorted_keys]]
+            single_core_max = [1. / v if v else 0 for v in [rdata[d]["max"]["timings"][k][crtest_core1] for k in sorted_keys]]
+            plt.fill_between(sorted_keys, single_core_min, single_core_max, alpha=alph, color=ld[d].get_color())
+
+        # Physical cores data with interpolation
+        phy_core_values = [1. / v if v else 0 for v in [rdata[d]["avg"]["timings"][k][crtest_core_phy] for k in sorted_keys]]
+        interpolated_phy = interpolate_missing_points(sorted_keys, phy_core_values)
+        plt.plot(sorted_keys, interpolated_phy, linestyle='--', color=ld[d].get_color())
+        if "min" in rdata[d]:
+            phy_core_min = interpolate_missing_points(sorted_keys, [1. / v if v else 0 for v in [rdata[d]["min"]["timings"][k][crtest_core_phy] for k in sorted_keys]])
+            phy_core_max = interpolate_missing_points(sorted_keys, [1. / v if v else 0 for v in [rdata[d]["max"]["timings"][k][crtest_core_phy] for k in sorted_keys]])
+            plt.fill_between(sorted_keys, phy_core_min, phy_core_max, alpha=alph, color=ld[d].get_color())
+
+        # All threads data
+        all_threads_values = [1. / v if v else 0 for v in [rdata[d]["avg"]["timings"][k][crtest_core_all] for k in sorted_keys]]
+        plt.plot(sorted_keys, all_threads_values, linestyle=':', color=ld[d].get_color())
+        if "min" in rdata[d]:
+            all_threads_min = [1. / v if v else 0 for v in [rdata[d]["min"]["timings"][k][crtest_core_all] for k in sorted_keys]]
+            all_threads_max = [1. / v if v else 0 for v in [rdata[d]["max"]["timings"][k][crtest_core_all] for k in sorted_keys]]
+            plt.fill_between(sorted_keys, all_threads_min, all_threads_max, alpha=alph, color=ld[d].get_color())
+
+    plt.legend(handles=legend_lines)
+    plt.xlabel("core number", verticalalignment='center')
+    plt.ylabel("steps per second")
+    plt.annotate(t_labels[crtest_core1], xy=fig_lab_pos, xycoords="axes fraction", horizontalalignment='center')
+    plt.xlim(1 - exp, ntm + exp)
+    if args.log and plt.ylim()[0] > 0:
+        plt.yscale("log")
+    else:
+        plt.ylim(ymin=0.)
+    if ntm >= 10:
+        x_ticks = list(range(0, ntm, 2 ** (int(m.log2(ntm)) - 2)))
+        if ntm not in x_ticks:
+            x_ticks.append(ntm)
+    else:
+        x_ticks = list(range(1, ntm + 1))
+    plt.xticks(x_ticks)
+    plt.tick_params(axis='y', which='both', right=True)
+
     for test in (sedov_weak, sedov_strong, sedov_flood, maclaurin_weak, maclaurin_strong, maclaurin_flood, crtest_weak, crtest_strong, crtest_flood):
         sub += 1
         plot_subplot(sub, rdata, test, t_labels, ld, args, fig_lab_pos, exp, ntm)
