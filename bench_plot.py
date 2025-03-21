@@ -298,7 +298,7 @@ def plot_subplot(sub: int, rdata: Dict[str, float], test: int, t_labels: List[st
         exp (float): Expansion factor for x-axis limits.
         ntm (int): Maximum number of threads.
     """
-    plt.subplot(4, 3, sub)
+    plt.subplot(*PLOT_GRID, sub)
     ym = []
     has_data = False
     for d in rdata:
@@ -323,6 +323,7 @@ def plot_subplot(sub: int, rdata: Dict[str, float], test: int, t_labels: List[st
                 if "min" in rdata[d]:
                     ymin.append(rdata[d]["min"]["timings"][x][test])
                     ymax.append(rdata[d]["max"]["timings"][x][test])
+
         if test in (sedov_strong, maclaurin_strong, crtest_strong):
             for i in range(len(y)):
                 if y[i]:
@@ -330,6 +331,7 @@ def plot_subplot(sub: int, rdata: Dict[str, float], test: int, t_labels: List[st
                     if "min" in rdata[d]:
                         ymin[i] *= n[i]
                         ymax[i] *= n[i]
+
         ywhere = np.empty_like(y, dtype=bool)
         if "min" in rdata[d]:
             for i in range(len(y)):
@@ -337,20 +339,20 @@ def plot_subplot(sub: int, rdata: Dict[str, float], test: int, t_labels: List[st
                 if not ywhere[i]:
                     ymin[i] = 0.
                     ymax[i] = 0.
+
         if len(y) - y.count(None) > 1:
-            plt.plot(n, y)
+            plot_with_shading(n, y, ymin if "min" in rdata[d] else None, ymax if "min" in rdata[d] else None,
+                              color=ld[d].get_color(), where=ywhere)
             for x in y:
                 if x:
                     has_data = True
         else:
             plt.plot(n, y, marker='o')
-        if "min" in rdata[d]:
-            linew = 1 if len(n) > 1 else 10
-            plt.fill_between(n, ymin, ymax, alpha=0.2, color=ld[d].get_color(), where=ywhere, linewidth=linew)
         try:
             ym.append(max(filter(lambda v: v is not None, y)))
         except ValueError:
             pass
+
     ymax = plt.ylim()[1]
     try:
         if ymax > 1.5 * max(ym):
@@ -358,55 +360,113 @@ def plot_subplot(sub: int, rdata: Dict[str, float], test: int, t_labels: List[st
     except ValueError:
         pass
 
+    # Set labels based on test type
     if test in (sedov_flood, maclaurin_flood, crtest_flood):
         xla = "N independent threads"
     elif test in (crtest_core1, sedov_core1, maclaurin_core1, sedov_core_phy, maclaurin_core_phy, crtest_core_phy, sedov_core_all, maclaurin_core_all, crtest_core_all):
         xla = "core number"
     else:
         xla = "N_threads (MPI-1)"
-    plt.xlabel(xla, verticalalignment='center')
-    if test in (sedov_strong, maclaurin_strong, crtest_strong):
-        plt.ylabel("time * N_threads [s]")
-    elif test in (crtest_core1, sedov_core1, maclaurin_core1, sedov_core_phy, maclaurin_core_phy, crtest_core_phy, sedov_core_all, maclaurin_core_all, crtest_core_all):
-        plt.ylabel("steps per second")
-    else:
-        plt.ylabel("time [s]")
-    plt.annotate(t_labels[test], xy=fig_lab_pos, xycoords="axes fraction", horizontalalignment='center')
-    if args.log and has_data:  # don't crash on empty plots
-        plt.yscale("log")
-    else:
-        if ymax > 0:
-            plt.ylim([0., ymax])
-    plt.xlim(1 - exp, ntm + exp)
 
+    yla = "steps per second" if test in (crtest_core1, sedov_core1, maclaurin_core1, sedov_core_phy, maclaurin_core_phy, crtest_core_phy, sedov_core_all, maclaurin_core_all, crtest_core_all) else "time [s]"
+    if test in (sedov_strong, maclaurin_strong, crtest_strong):
+        yla = "time * N_threads [s]"
+
+    add_subplot_labels(t_labels[test], xla, yla)
+    setup_axis_ticks(ntm, PLOT_EXPANSION)
+
+    if args.log and has_data:
+        plt.yscale("log")
+    elif ymax > 0:
+        plt.ylim([0., ymax])
+
+
+# Define test labels as a constant
+def get_test_labels(big: float) -> List[str]:
+    """
+    Generates test labels with appropriate problem sizes.
+
+    Args:
+        big (float): Size multiplier for the test domains.
+
+    Returns:
+        List[str]: List of formatted test labels.
+    """
+    base_sizes = {
+        'sedov': 64,
+        'maclaurin': {'weak': 64, 'strong': 128, 'flood': 64},
+        'crtest': 32
+    }
+
+    descriptions = {
+        'weak': "{}, weak scaling\nN_thr * {} x {} x {}, {} decomposition",
+        'strong': "{}, strong scaling\n{} x {} x {}, {} decomposition",
+        'flood': "{}, flood scaling, {} x {} x {}",
+        'core': "Core performance on {}, {} x {} x {}"
+    }
+
+    decomp = {'sedov': 'cartesian', 'maclaurin': 'block', 'crtest': 'noncartesian'}
+    labels = []
+
+    # Generate scaling labels
+    for test in ['sedov', 'maclaurin', 'crtest']:
+        for scale in ['weak', 'strong', 'flood']:
+            size = base_sizes[test] if isinstance(base_sizes[test], int) else base_sizes[test][scale]
+            size_str = str(int(size * big))
+            if scale == 'flood':
+                labels.append(descriptions[scale].format(test, size_str, size_str, size_str))
+            else:
+                labels.append(descriptions[scale].format(test, size_str, size_str, size_str, f"{decomp[test]} decomposition"))
+
+    # Generate core performance labels
+    for test in ['sedov', 'maclaurin', 'crtest']:
+        size = base_sizes[test] if isinstance(base_sizes[test], int) else base_sizes[test]['weak']
+        size_str = str(int(size * big))
+        labels.extend([descriptions['core'].format(test, size_str, size_str, size_str)] * 3)
+
+    return labels
+
+
+PLOT_ALPHA = 0.2
+PLOT_EXPANSION = 0.25
+FIGURE_SIZE = (24, 12)
+PLOT_GRID = (4, 3)
+SUBPLOT_ADJUSTMENTS = {
+    'top': 0.95,
+    'left': 0.04,
+    'right': 0.99,
+    'wspace': 0.15
+}
+
+
+def setup_axis_ticks(ntm: int, exp: float) -> None:
+    """Helper function to set up axis ticks consistently"""
     if ntm >= 10:
-        x_ticks = list(range(0, ntm, 2 ** (int(m.log2(ntm)) - 2)))  # this should produce between 5 and 8 tics, separated by powers of 2
+        x_ticks = list(range(0, ntm, 2 ** (int(m.log2(ntm)) - 2)))
         if ntm not in x_ticks:
             x_ticks.append(ntm)
     else:
         x_ticks = list(range(1, ntm + 1))
     plt.xticks(x_ticks)
-    plt.tick_params(axis='y', which='both', right=True)  # Add ticks on the right side
+    plt.tick_params(axis='y', which='both', right=True)
+    plt.xlim(1 - exp, ntm + exp)
 
 
-# Define test labels as a constant
-def get_test_labels(big: float) -> List[str]:
-    sizes = [64, 64, 64, 64, 128, 64, 32, 32, 32, 64, 64, 64, 64, 64, 64, 32, 32, 32]
-    descriptions = [
-        "sedov, weak scaling\nN_thr * {} x {} x {}, cartesian decomposition",
-        "sedov, strong scaling\n{} x {} x {}, cartesian decomposition",
-        "sedov, flood scaling, {} x {} x {}",
-        "maclaurin, weak scaling\nN_thr * {} x {} x {}, block decomposition 32 x 32 x 32",
-        "maclaurin, strong scaling\n{} x {} x {}, block decomposition 32 x 32 x 32",
-        "maclaurin, flood scaling\n{} x {} x {}, block decomposition 32 x 32 x 32",
-        "crtest, weak scaling\nN_thr * {} x {} x {}, noncartesian decomposition",
-        "crtest, strong scaling\n{} x {} x {}, noncartesian decomposition",
-        "crtest, flood scaling, {} x {} x {}",
-        "Core performance on sedov, {} x {} x {}", "Core performance on sedov, {} x {} x {}", "Core performance on sedov, {} x {} x {}",
-        "Core performance on maclaurin, {} x {} x {}", "Core performance on maclaurin, {} x {} x {}", "Core performance on maclaurin, {} x {} x {}",
-        "Core performance on crtest, {} x {} x {}", "Core performance on crtest, {} x {} x {}", "Core performance on crtest, {} x {} x {}"
-    ]
-    return [desc.format(int(size * big), int(size * big), int(size * big)) for desc, size in zip(descriptions, sizes)]
+def add_subplot_labels(title: str, xlabel: str, ylabel: str) -> None:
+    """Helper function to add consistent subplot labels"""
+    plt.annotate(title, xy=fig_lab_pos, xycoords="axes fraction", horizontalalignment='center')
+    plt.xlabel(xlabel, verticalalignment='center')
+    plt.ylabel(ylabel)
+
+
+def plot_with_shading(x: List[int], y: List[float], ymin: List[float], ymax: List[float],
+                      color: str, alpha: float = PLOT_ALPHA, linestyle: str = '-',
+                      where: np.ndarray = None) -> None:
+    """Helper function to plot a line with optional shading"""
+    plt.plot(x, y, color=color, linestyle=linestyle)
+    if ymin is not None and ymax is not None:
+        linew = 1 if len(x) > 1 else 10
+        plt.fill_between(x, ymin, ymax, alpha=alpha, color=color, where=where, linewidth=linew)
 
 
 def mkrplot(rdata: Dict[str, float], args: argparse.Namespace, output_file: str = None) -> None:
@@ -418,51 +478,51 @@ def mkrplot(rdata: Dict[str, float], args: argparse.Namespace, output_file: str 
         args (argparse.Namespace): Parsed command-line arguments.
         output_file (str, optional): Path to save the plot. Defaults to None.
     """
-    plt.figure(figsize=(24, 12))
+    plt.figure(figsize=FIGURE_SIZE)
 
-    big = -1
-    for d in rdata:
-        if big < 0:
-            big = rdata[d]["big"]
-        elif big != rdata[d]["big"]:
-            print("Mixed benchmark sizes")
-            big = 0
+    # Initialize common parameters
+    big = next((d["big"] for d in rdata.values()), -1)
+    if any(d["big"] != big for d in rdata.values()):
+        print("Mixed benchmark sizes")
+        big = 0
 
     m_labels = ["setup", "serial\nmake", "parallel\nmake", "parallel\nmake 2 obj.", "parallel\nmake 4 obj.", "parallel\nmake 8 obj."]
     t_labels = get_test_labels(big)
-
-    alph = 0.2
-    exp = 0.25
-    sub = 1
     lines = []
     ld = {}
-    plt.subplot(4, 3, sub)
+
+    # Plot compilation time
+    plt.subplot(*PLOT_GRID, 1)
     for d in rdata:
         l, = plt.plot(rdata[d]["avg"]["make_real"])
         if "min" in rdata[d]:
-            plt.fill_between(list(range(len(rdata[d]["avg"]["make_real"]))), rdata[d]["min"]["make_real"], rdata[d]["max"]["make_real"], alpha=alph, color=l.get_color())
+            plot_with_shading(list(range(len(rdata[d]["avg"]["make_real"]))),
+                              rdata[d]["avg"]["make_real"],
+                              rdata[d]["min"]["make_real"],
+                              rdata[d]["max"]["make_real"],
+                              color=l.get_color())
         lines.append(l)
         ld[d] = l
-    plt.ylabel("time [s]")
-    plt.xticks(list(range(len(rdata[d]["avg"]["make_real"]))), m_labels)
-    plt.annotate("compilation time", xy=fig_lab_pos, xycoords="axes fraction", horizontalalignment='center')
+    add_subplot_labels("compilation time", "", "time [s]")
+    plt.xticks(list(range(len(m_labels))), m_labels)
     if args.log and plt.ylim()[0] > 0:
         plt.yscale("log")
     else:
         plt.ylim(ymin=0.)
-    plt.xlim(-exp, len(m_labels) - 1 + exp)
+    plt.xlim(-PLOT_EXPANSION, len(m_labels) - 1 + PLOT_EXPANSION)
 
-    sub = 2
-    plt.subplot(4, 3, sub)
+    # Plot CPU load
+    plt.subplot(*PLOT_GRID, 2)
     for d in rdata:
-        plt.plot(rdata[d]["avg"]["make_load"])
-        if "min" in rdata[d]:
-            plt.fill_between(list(range(len(rdata[d]["avg"]["make_load"]))), rdata[d]["min"]["make_load"], rdata[d]["max"]["make_load"], alpha=alph, color=ld[d].get_color())
-    plt.ylabel("CPU load [%]")
-    plt.xticks(list(range(len(rdata[d]["avg"]["make_load"]))), m_labels)
-    plt.annotate("compilation CPU usage", xy=fig_lab_pos, xycoords="axes fraction", horizontalalignment='center')
+        plot_with_shading(list(range(len(rdata[d]["avg"]["make_load"]))),
+                          rdata[d]["avg"]["make_load"],
+                          rdata[d]["min"]["make_load"] if "min" in rdata[d] else None,
+                          rdata[d]["max"]["make_load"] if "min" in rdata[d] else None,
+                          color=ld[d].get_color())
+    add_subplot_labels("compilation CPU usage", "", "CPU load [%]")
+    plt.xticks(list(range(len(m_labels))), m_labels)
     plt.ylim(ymin=0.)
-    plt.xlim(-exp, len(m_labels) - 1 + exp)
+    plt.xlim(-PLOT_EXPANSION, len(m_labels) - 1 + PLOT_EXPANSION)
 
     ntm = 0
     for d in rdata:
@@ -490,6 +550,22 @@ def mkrplot(rdata: Dict[str, float], args: argparse.Namespace, output_file: str 
                 result.append(last_valid)
         return result
 
+    def plot_core_profile(sorted_keys: List[int], rdata_entry: Dict[str, float], color: str,
+                          core_type: int, linestyle: str = '-') -> None:
+        """Helper function to plot a single core profile with shading"""
+        values = [1. / v if v else 0 for v in [rdata_entry["avg"]["timings"][k][core_type] for k in sorted_keys]]
+        if core_type == crtest_core_phy:  # Only interpolate physical cores data
+            values = interpolate_missing_points(sorted_keys, values)
+        plt.plot(sorted_keys, values, linestyle=linestyle, color=color)
+
+        if "min" in rdata_entry:
+            min_vals = [1. / v if v else 0 for v in [rdata_entry["min"]["timings"][k][core_type] for k in sorted_keys]]
+            max_vals = [1. / v if v else 0 for v in [rdata_entry["max"]["timings"][k][core_type] for k in sorted_keys]]
+            if core_type == crtest_core_phy:
+                min_vals = interpolate_missing_points(sorted_keys, min_vals)
+                max_vals = interpolate_missing_points(sorted_keys, max_vals)
+            plt.fill_between(sorted_keys, min_vals, max_vals, alpha=PLOT_ALPHA, color=color)
+
     sub = 3
     plt.subplot(4, 3, sub)
     # Create invisible black lines for legend
@@ -501,36 +577,17 @@ def mkrplot(rdata: Dict[str, float], args: argparse.Namespace, output_file: str 
     # Plot all three data series directly without calling plot_subplot first
     for d in rdata:
         sorted_keys = sorted(rdata[d]["avg"]["timings"].keys())
-        # Single core data
-        single_core_values = [1. / v if v else 0 for v in [rdata[d]["avg"]["timings"][k][crtest_core1] for k in sorted_keys]]
-        plt.plot(sorted_keys, single_core_values, color=ld[d].get_color())
-        if "min" in rdata[d]:
-            single_core_min = [1. / v if v else 0 for v in [rdata[d]["min"]["timings"][k][crtest_core1] for k in sorted_keys]]
-            single_core_max = [1. / v if v else 0 for v in [rdata[d]["max"]["timings"][k][crtest_core1] for k in sorted_keys]]
-            plt.fill_between(sorted_keys, single_core_min, single_core_max, alpha=alph, color=ld[d].get_color())
-
-        # Physical cores data with interpolation
-        phy_core_values = [1. / v if v else 0 for v in [rdata[d]["avg"]["timings"][k][crtest_core_phy] for k in sorted_keys]]
-        interpolated_phy = interpolate_missing_points(sorted_keys, phy_core_values)
-        plt.plot(sorted_keys, interpolated_phy, linestyle='--', color=ld[d].get_color())
-        if "min" in rdata[d]:
-            phy_core_min = interpolate_missing_points(sorted_keys, [1. / v if v else 0 for v in [rdata[d]["min"]["timings"][k][crtest_core_phy] for k in sorted_keys]])
-            phy_core_max = interpolate_missing_points(sorted_keys, [1. / v if v else 0 for v in [rdata[d]["max"]["timings"][k][crtest_core_phy] for k in sorted_keys]])
-            plt.fill_between(sorted_keys, phy_core_min, phy_core_max, alpha=alph, color=ld[d].get_color())
-
-        # All threads data
-        all_threads_values = [1. / v if v else 0 for v in [rdata[d]["avg"]["timings"][k][crtest_core_all] for k in sorted_keys]]
-        plt.plot(sorted_keys, all_threads_values, linestyle=':', color=ld[d].get_color())
-        if "min" in rdata[d]:
-            all_threads_min = [1. / v if v else 0 for v in [rdata[d]["min"]["timings"][k][crtest_core_all] for k in sorted_keys]]
-            all_threads_max = [1. / v if v else 0 for v in [rdata[d]["max"]["timings"][k][crtest_core_all] for k in sorted_keys]]
-            plt.fill_between(sorted_keys, all_threads_min, all_threads_max, alpha=alph, color=ld[d].get_color())
+        color = ld[d].get_color()
+        # Plot all three profiles with different line styles
+        plot_core_profile(sorted_keys, rdata[d], color, crtest_core1)
+        plot_core_profile(sorted_keys, rdata[d], color, crtest_core_phy, linestyle='--')
+        plot_core_profile(sorted_keys, rdata[d], color, crtest_core_all, linestyle=':')
 
     plt.legend(handles=legend_lines)
     plt.xlabel("core number", verticalalignment='center')
     plt.ylabel("steps per second")
     plt.annotate(t_labels[crtest_core1], xy=fig_lab_pos, xycoords="axes fraction", horizontalalignment='center')
-    plt.xlim(1 - exp, ntm + exp)
+    plt.xlim(1 - PLOT_EXPANSION, ntm + PLOT_EXPANSION)
     if args.log and plt.ylim()[0] > 0:
         plt.yscale("log")
     else:
@@ -546,13 +603,16 @@ def mkrplot(rdata: Dict[str, float], args: argparse.Namespace, output_file: str 
 
     for test in (sedov_weak, sedov_strong, sedov_flood, maclaurin_weak, maclaurin_strong, maclaurin_flood, crtest_weak, crtest_strong, crtest_flood):
         sub += 1
-        plot_subplot(sub, rdata, test, t_labels, ld, args, fig_lab_pos, exp, ntm)
+        plot_subplot(sub, rdata, test, t_labels, ld, args, fig_lab_pos, PLOT_EXPANSION, ntm)
 
     names = []
     for d in rdata:
         names.append(d)
 
-    plt.subplots_adjust(top=0.95, bottom=0.05 + 0.025 * int((len(rdata) - 1) / 2 + 1), left=0.04, right=0.99, wspace=0.15)
+    plt.subplots_adjust(
+        bottom=0.05 + 0.025 * int((len(rdata) - 1) / 2 + 1),
+        **SUBPLOT_ADJUSTMENTS
+    )
     plt.figlegend((lines), names, loc="lower center", ncol=2, frameon=False)
     plt.annotate("Piernik benchmarks", xy=(0.5, 0.97), xycoords="figure fraction", horizontalalignment='center', size=20)
 
