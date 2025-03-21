@@ -14,7 +14,8 @@ from typing import List, Dict, Tuple
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Define constants for benchmark types and make stages
-sedov_weak, sedov_strong, sedov_flood, maclaurin_weak, maclaurin_strong, maclaurin_flood, crtest_weak, crtest_strong, crtest_flood = list(range(9))
+sedov_weak, sedov_strong, sedov_flood, maclaurin_weak, maclaurin_strong, maclaurin_flood, crtest_weak, crtest_strong, crtest_flood, core_sedov, core_maclaurin, core_crtest = list(range(12))
+bench_types = core_crtest + 1
 make_prep, make_11, make_1n, make_2n, make_4n, make_8n = list(range(6))
 
 amm = ["avg", "min", "max"]
@@ -31,7 +32,11 @@ MACLAURIN_FLOOD_PATTERN = re.compile(r"(.*)maclaurin, flood")
 CRTEST_WEAK_PATTERN = re.compile(r"(.*)crtest, weak")
 CRTEST_STRONG_PATTERN = re.compile(r"(.*)crtest, strong")
 CRTEST_FLOOD_PATTERN = re.compile(r"(.*)crtest, flood")
+CORE_SEDOV_PATTERN = re.compile(r"(.*)Core profiling on sedov")
+CORE_MACLAURIN_PATTERN = re.compile(r"(.*)Core profiling on maclaurin")
+CORE_CRTEST_PATTERN = re.compile(r"(.*)Core profiling on crtest")
 
+# Define constants for column indices
 MAKE_TIME_INDEX = -4
 MAKE_LOAD_INDEX = -1
 CRTEST_DATA_COLUMN = 3
@@ -74,6 +79,9 @@ def determine_benchmark_type(line: str) -> int:
         CRTEST_WEAK_PATTERN: crtest_weak,
         CRTEST_STRONG_PATTERN: crtest_strong,
         CRTEST_FLOOD_PATTERN: crtest_flood,
+        CORE_SEDOV_PATTERN: core_sedov,
+        CORE_MACLAURIN_PATTERN: core_maclaurin,
+        CORE_CRTEST_PATTERN: core_crtest,
     }
     for pattern, benchmark_type in patterns.items():
         if pattern.match(line):
@@ -91,11 +99,11 @@ def determine_data_column(benchmark_type: int) -> int:
     Returns:
         int: Data column index.
     """
-    if benchmark_type in (crtest_weak, crtest_strong, crtest_flood):
+    if benchmark_type in (crtest_weak, crtest_strong, crtest_flood, core_crtest):
         return CRTEST_DATA_COLUMN
-    elif benchmark_type in (sedov_weak, sedov_strong, sedov_flood):
+    elif benchmark_type in (sedov_weak, sedov_strong, sedov_flood, core_sedov):
         return SEDOV_DATA_COLUMN
-    elif benchmark_type in (maclaurin_weak, maclaurin_strong, maclaurin_flood):
+    elif benchmark_type in (maclaurin_weak, maclaurin_strong, maclaurin_flood, core_maclaurin):
         return MACLAURIN_DATA_COLUMN
     return INVALID_COLUMN
 
@@ -148,7 +156,7 @@ def process_timing_data(columns: List[str], data: Dict[str, float], timings: Dic
             logging.warning(f"Ignoring bogus thread number: {columns}")
         elif nthr > 0:
             if nthr not in timings:
-                timings[nthr] = [[] for _ in range(crtest_flood + 1)]
+                timings[nthr] = [[] for _ in range(bench_types)]
             timings[nthr][b_type].append(float(columns[d_col]) / (data["big"]**3) if len(columns) >= d_col + 1 else None)
     except ValueError:
         if not re.match("#", columns[0]):
@@ -282,10 +290,22 @@ def plot_subplot(sub: int, rdata: Dict[str, float], test: int, t_labels: List[st
         ymin = []
         ymax = []
         for x in n:
-            y.append(rdata[d]["avg"]["timings"][x][test])
-            if "min" in rdata[d]:
-                ymin.append(rdata[d]["min"]["timings"][x][test])
-                ymax.append(rdata[d]["max"]["timings"][x][test])
+            if test in (core_crtest, core_sedov, core_maclaurin):
+                if rdata[d]["avg"]["timings"][x][test]:
+                    y.append(1./rdata[d]["avg"]["timings"][x][test])
+                    if "min" in rdata[d]:
+                        ymin.append(1./rdata[d]["min"]["timings"][x][test])
+                        ymax.append(1./rdata[d]["max"]["timings"][x][test])
+                else:
+                    y.append(0)
+                    if "min" in rdata[d]:
+                        ymin.append(0)
+                        ymax.append(0)
+            else:
+                y.append(rdata[d]["avg"]["timings"][x][test])
+                if "min" in rdata[d]:
+                    ymin.append(rdata[d]["min"]["timings"][x][test])
+                    ymax.append(rdata[d]["max"]["timings"][x][test])
         if test in (sedov_strong, maclaurin_strong, crtest_strong):
             for i in range(len(y)):
                 if y[i]:
@@ -300,10 +320,10 @@ def plot_subplot(sub: int, rdata: Dict[str, float], test: int, t_labels: List[st
                 if not ywhere[i]:
                     ymin[i] = 0.
                     ymax[i] = 0.
-        if len(n) > 1:
+        if len(y) - y.count(None) > 1:
             plt.plot(n, y)
             for x in y:
-                if x is not None:
+                if x:
                     has_data = True
         else:
             plt.plot(n, y, marker='o')
@@ -321,31 +341,31 @@ def plot_subplot(sub: int, rdata: Dict[str, float], test: int, t_labels: List[st
     except ValueError:
         pass
 
-    xla = "N independent threads" if test in (sedov_flood, maclaurin_flood, crtest_flood) else "N_threads (MPI-1)"
+    if test in (sedov_flood, maclaurin_flood, crtest_flood):
+        xla = "N independent threads"
+    elif test in (core_crtest, core_sedov, core_maclaurin):
+        xla = "core number"
+    else:
+        xla = "N_threads (MPI-1)"
     plt.xlabel(xla, verticalalignment='center')
     if test in (sedov_strong, maclaurin_strong, crtest_strong):
         plt.ylabel("time * N_threads [s]")
+    elif test in (core_crtest, core_sedov, core_maclaurin):
+        plt.ylabel("steps per second")
     else:
         plt.ylabel("time [s]")
     plt.annotate(t_labels[test], xy=fig_lab_pos, xycoords="axes fraction", horizontalalignment='center')
     if args.log and has_data:  # don't crash on empty plots
         plt.yscale("log")
     else:
-        plt.ylim([0., ymax])
+        if ymax > 0:
+            plt.ylim([0., ymax])
     plt.xlim(1 - exp, ntm + exp)
 
     if ntm >= 10:
-        xf, xi = m.modf(m.log10(ntm))
-        xf = pow(10, xf)
-        if xf >= 5.:
-            xf = 1
-            xi += 1
-        elif xf >= 2.:
-            xf = 5
-        else:
-            xf = 2
-        xtstep = int(xf * m.pow(10, xi - 1))
-        x_ticks = list(range(0, ntm + xtstep, xtstep))
+        x_ticks = list(range(0, ntm, 2 ** (int(m.log2(ntm)) - 2)))  # this should produce between 5 and 8 tics, separated by powers of 2
+        if ntm not in x_ticks:
+            x_ticks.append(ntm)
     else:
         x_ticks = list(range(1, ntm + 1))
     plt.xticks(x_ticks)
@@ -354,7 +374,7 @@ def plot_subplot(sub: int, rdata: Dict[str, float], test: int, t_labels: List[st
 
 # Define test labels as a constant
 def get_test_labels(big: float) -> List[str]:
-    sizes = [64, 64, 64, 64, 128, 64, 32, 32, 32]
+    sizes = [64, 64, 64, 64, 128, 64, 32, 32, 32, 64, 64, 32]
     descriptions = [
         "sedov, weak scaling\nN_thr * {} x {} x {}, cartesian decomposition",
         "sedov, strong scaling\n{} x {} x {}, cartesian decomposition",
@@ -364,7 +384,10 @@ def get_test_labels(big: float) -> List[str]:
         "maclaurin, flood scaling\n{} x {} x {}, block decomposition 32 x 32 x 32",
         "crtest, weak scaling\nN_thr * {} x {} x {}, noncartesian decomposition",
         "crtest, strong scaling\n{} x {} x {}, noncartesian decomposition",
-        "crtest, flood scaling, {} x {} x {}"
+        "crtest, flood scaling, {} x {} x {}",
+        "Core profiling on sedov\n{} x {} x {}",
+        "Core profiling on maclaurin\n{} x {} x {}",
+        "Core profiling on crtest\n{} x {} x {}"
     ]
     return [desc.format(int(size * big), int(size * big), int(size * big)) for desc, size in zip(descriptions, sizes)]
 
@@ -430,6 +453,8 @@ def mkrplot(rdata: Dict[str, float], args: argparse.Namespace, output_file: str 
             ntm = max(ntm, k)
 
     sub = 3
+    test = core_crtest  # alternatives: core_sedov, core_maclaurin
+    plot_subplot(sub, rdata, core_crtest, t_labels, ld, args, fig_lab_pos, exp, ntm)
     for test in (sedov_weak, sedov_strong, sedov_flood, maclaurin_weak, maclaurin_strong, maclaurin_flood, crtest_weak, crtest_strong, crtest_flood):
         sub += 1
         plot_subplot(sub, rdata, test, t_labels, ld, args, fig_lab_pos, exp, ntm)
@@ -649,7 +674,7 @@ def main() -> None:
         logging.error(f"IO error: {e}")
         exit(1)
     except Exception as e:
-        logging.error(f"An unexpected error occurred: {e}")
+        logging.error(f"An unexpected error occurred: {e}", exc_info=True)
         exit(1)
 
 
