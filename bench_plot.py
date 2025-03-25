@@ -571,8 +571,8 @@ def mkrplot(rdata: Dict[str, float], args: argparse.Namespace, output_file: str 
     # Create invisible black lines for legend
     legend_lines = []
     legend_lines.append(plt.plot([], [], color='black', label='Single core load')[0])
-    legend_lines.append(plt.plot([], [], color='black', linestyle='--', label='Physical cores (flood)')[0])
-    legend_lines.append(plt.plot([], [], color='black', linestyle=':', label='All threads (flood)')[0])
+    legend_lines.append(plt.plot([], [], color='black', linestyle='--', label='Flood all cores')[0])
+    legend_lines.append(plt.plot([], [], color='black', linestyle=':', label='Flood all threads')[0])
 
     # Plot all three data series directly without calling plot_subplot first
     for d in rdata:
