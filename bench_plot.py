@@ -416,7 +416,7 @@ def get_test_labels(big: float) -> List[str]:
             if scale == 'flood':
                 labels.append(descriptions[scale].format(test, size_str, size_str, size_str))
             else:
-                labels.append(descriptions[scale].format(test, size_str, size_str, size_str, f"{decomp[test]} decomposition"))
+                labels.append(descriptions[scale].format(test, size_str, size_str, size_str, f"{decomp[test]}"))
 
     # Generate core performance labels
     for test in ['sedov', 'maclaurin', 'crtest']:
