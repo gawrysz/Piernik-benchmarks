@@ -1,0 +1,122 @@
+## model name : Intel(R) Core(TM) i3-2370M CPU @ 2.40GHz
+## Memory : 3.76074 GB
+# test domains are scaled by factor of 1.5
+Preparing objects                real/user/sys/CPU%:    17.8    12.2     8.8  118.45%
+Single-thread make object        real/user/sys/CPU%:    91.5    85.8     4.9   99.15%
+Multi-thread make object         real/user/sys/CPU%:    58.1   117.1     5.8  211.35%
+Multi-thread make two objects    real/user/sys/CPU%:    81.5   232.2    11.2  298.55%
+Multi-thread make four objects   real/user/sys/CPU%:   155.3   570.6    24.9  383.48%
+Multi-thread make eight objects  real/user/sys/CPU%:   301.1  1112.3    49.1  385.74%
+
+## Thu Jul 17 14:16:19 CEST 2025
+## Core profiling on crtest problem, single core on cores 1 to 4
+#Threads MG_prepare MG_cycle Total_MG 
+1        0.1910     0.9110   12.224   
+2        0.1940     0.9210   12.363   
+3        0.1910     0.9140   12.273   
+4        0.1920     0.9180   12.326   
+
+## Thu Jul 17 14:17:28 CEST 2025
+## Core profiling on crtest problem, all physical cores (1 3)
+#Threads MG_prepare MG_cycle Total_MG 
+1        0.1960     0.9190   12.345   
+3        0.1960     0.9130   12.264   
+
+## Thu Jul 17 14:17:45 CEST 2025
+## Core profiling on crtest problem, all threads (1 to 4)
+#Threads MG_prepare MG_cycle Total_MG 
+1        0.3170     1.4910   19.948   
+2        0.3040     1.4730   19.773   
+3        0.3090     1.4730   19.824   
+4        0.3060     1.4950   20.155   
+
+## Thu Jul 17 14:18:11 CEST 2025
+Benchmarking sedov, flood scaling
+#Threads dWallClock1 dWallClock2 dWallClock3 dWallClock4 dWallClock5 dWallClock_Average 
+1        2.5646      2.5008      2.5202      2.5268      2.5479      2.53206            
+2        2.7201      2.6481      2.6567      2.8028      2.7140      2.70834            
+2        2.7205      2.6450      2.6518      2.8254      2.6816      2.70486            
+3        2.6473      2.6955      2.6993      2.6950      2.7423      2.69588            
+3        5.1235      4.7121      4.2487      2.6441      2.6649      3.87866            
+3        5.1569      4.9000      4.2565      2.6427      2.6951      3.93024            
+4        4.9896      4.9678      4.8471      5.0239      5.1368      4.99304            
+4        5.0160      4.8650      4.8045      4.7952      5.0151      4.89916            
+4        5.0685      4.8762      4.8104      4.8170      5.0152      4.91746            
+4        4.9963      4.9749      4.8584      4.9285      5.1668      4.98498            
+
+## Thu Jul 17 14:19:39 CEST 2025
+Benchmarking sedov, strong scaling
+#Threads dWallClock1 dWallClock2 dWallClock3 dWallClock4 dWallClock5 dWallClock_Average 
+1        2.5663      2.5152      2.5102      2.5256      2.5399      2.53144            
+2        1.5522      1.4886      1.4940      1.4897      1.5048      1.50586            
+3        1.9729      1.9520      1.8763      1.9305      1.9463      1.93560            
+4        1.7317      1.6308      1.6733      1.8295      1.7029      1.71364            
+
+## Thu Jul 17 14:20:30 CEST 2025
+Benchmarking sedov, weak scaling
+#Threads dWallClock1 dWallClock2 dWallClock3 dWallClock4 dWallClock5 dWallClock_Average 
+1        2.5629      2.5072      2.5148      2.5184      2.5406      2.52878            
+2        2.8524      2.7441      2.7457      2.7526      2.7625      2.77146            
+3        5.0986      5.1861      5.0448      4.9618      5.1337      5.08500            
+4        5.4648      5.3354      5.2964      5.2330      5.4164      5.34920            
+
+## Thu Jul 17 14:22:05 CEST 2025
+Benchmarking crtest, flood scaling
+#Threads MG_prepare MG_cycle Total_MG 
+1        0.1930     0.9220   12.308   
+2        0.1950     0.9220   12.367   
+2        0.1950     0.9240   12.410   
+3        0.2500     1.0450   13.729   
+3        0.3060     1.4520   17.289   
+3        0.2920     1.2470   16.519   
+4        0.3090     1.4820   19.887   
+4        0.3100     1.4850   19.943   
+4        0.3060     1.4880   20.036   
+4        0.3030     1.4610   19.610   
+
+## Thu Jul 17 14:23:29 CEST 2025
+Benchmarking crtest, strong scaling
+#Threads MG_prepare MG_cycle Total_MG 
+1        0.1930     0.9230   12.386   
+2        0.1030     0.4640   6.2431   
+3        0.2160     0.5100   6.8863   
+4        0.0880     0.3880   5.2321   
+
+## Thu Jul 17 14:24:17 CEST 2025
+Benchmarking crtest, weak scaling
+#Threads MG_prepare MG_cycle Total_MG 
+1        0.1920     0.9050   12.155   
+2        0.2080     0.9440   12.706   
+3        0.3200     1.4810   19.901   
+4        0.3780     1.5150   20.441   
+
+## Thu Jul 17 14:25:46 CEST 2025
+Benchmarking maclaurin, flood scaling
+#Threads MG_prepare MG_i-cycle MG_multipole MG_o-cycle Total_MG 
+1        0.0470     0.1390     2.3630       0.1300     3.6243   
+2        0.0750     0.1890     2.5390       0.1760     4.2634   
+2        0.0630     0.1920     2.5600       0.1810     4.3084   
+3        0.0510     0.1440     2.9010       0.1570     4.3233   
+3        0.0770     0.3020     4.1300       0.1770     6.3117   
+3        0.0950     0.3000     4.1430       0.1750     6.3263   
+4        0.0970     0.3920     5.1300       0.3610     8.6224   
+4        0.1490     0.3860     4.9240       0.3460     8.3664   
+4        0.1400     0.3890     5.1360       0.3560     8.6308   
+4        0.1180     0.3860     4.8630       0.3450     8.2784   
+
+## Thu Jul 17 14:26:39 CEST 2025
+Benchmarking maclaurin, strong scaling
+#Threads MG_prepare MG_i-cycle MG_multipole MG_o-cycle Total_MG 
+1        0.7310     1.2320     9.8290       1.0890     21.012   
+2        0.4740     1.1650     5.9320       1.0670     16.612   
+3        0.7560     1.2340     6.5960       1.0430     17.485   
+4        0.8650     1.1780     5.9810       1.1330     17.156   
+
+## Thu Jul 17 14:29:34 CEST 2025
+Benchmarking maclaurin, weak scaling
+#Threads MG_prepare MG_i-cycle MG_multipole MG_o-cycle Total_MG 
+1        0.0470     0.1400     2.4470       0.1310     3.7169   
+2        0.0810     0.2070     2.2570       0.1920     4.1408   
+3        0.1310     0.3350     3.5650       0.3120     6.6234   
+4        0.1830     0.4290     4.0650       0.3940     7.9628   
+
