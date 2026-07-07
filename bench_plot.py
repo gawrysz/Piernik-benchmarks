@@ -343,11 +343,12 @@ def plot_subplot(sub: int, rdata: Dict[str, float], test: int, t_labels: List[st
         if len(y) - y.count(None) > 1:
             plot_with_shading(n, y, ymin if "min" in rdata[d] else None, ymax if "min" in rdata[d] else None,
                               color=ld[d].get_color(), where=ywhere)
+            plt.plot(n, y, marker='X', linestyle='-')
             for x in y:
                 if x:
                     has_data = True
         else:
-            plt.plot(n, y, marker='o')
+            plt.plot(n, y, marker='X', linestyle='-')
         try:
             ym.append(max(filter(lambda v: v is not None, y)))
         except ValueError:
